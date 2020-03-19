@@ -1,0 +1,40 @@
+use browser ie
+open http://10.60.148.66/
+click /html/body/div[3]/div[1]/div/div/div/div[2]/a[1]
+input #userName T20433
+input #password Ouyeel123456
+click /html/body/div/div/div[2]/div/div/form/div[8]/button
+wait-url http://10.60.148.66/
+hover /html/body/div[1]/div/div[2]/div[5]/a
+wait-elem-present /html/body/div[1]/div/div[2]/div[5]/div
+click >询价管理
+close-tab-by-url http://10.60.148.66/
+wait-url http://10.60.148.66/main?t=buy&fv=OrderManage&sv=all&m=inquiry&s=lists
+click >发布询价单
+click >剪切加工询价单
+close-tab-by-url http://10.60.148.66/main?t=buy&fv=OrderManage&sv=tpl&m=inquiry&s=tpl
+input /html/body/div/div/div[5]/form/div[4]/div[2]/div/input 自动化测试询单
+input /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[2]/div/input 捆包号008
+click /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[3]/div/input[2]
+wait-elem-present /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[3]/div/div[1]
+click /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[3]/div/div[1]/table/tbody/tr/td[1]/div/div[1]
+click /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[3]/div/div[1]/table/tbody/tr/td[2]/div/div[1]
+input /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[4]/div/input 牌号
+input /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[5]/div/input 规格
+input /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[6]/div/input 100
+input /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[7]/div/input 产地
+input /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[8]/div/textarea 加工规格/件数(张数)
+input /html/body/div/div/div[5]/form/div[4]/table/tbody/tr[3]/td[8]/div/textarea 加工规格/件数(张数)
+click /html/body/div/div/div[5]/form/div[4]/div[7]/div[1]/div[1]/div[2]/span[1]
+click /html/body/div/div/div[5]/form/div[4]/div[7]/div[1]/div[1]/div[2]/span[1]
+wait-elem-present #myLargeModalLabel_1
+click #ds_185
+click /html/body/div[1]/div/div[5]/form/div[11]/div/div/div[2]/div[3]/div/div/a
+select #warehouse_name_select 宝盈通测试库
+input /html/body/div/div/div[5]/form/div[4]/div[7]/div[1]/div[3]/div/input 原料所在地
+select #varietys 委托协议下单
+input /html/body/div/div/div[5]/form/div[4]/div[7]/div[3]/div[1]/div[1]/input 自动
+input /html/body/div/div/div[5]/form/div[4]/div[7]/div[3]/div[2]/div[1]/input 18068708790
+click #submitSave
+wait-elem-text /html/body/div/div/div/div[2]/div/div[2]/div[1]/p[1]/b 您的加工单已成功发送!
+close browser

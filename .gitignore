@@ -1,0 +1,5 @@
+/vendor/
+.settings
+/src/vendor
+/.buildpath
+/.project

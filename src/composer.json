@@ -1,0 +1,13 @@
+{
+	"name" : "sige/xunyu",
+	"description" : "a tester",
+	"type" : "project",
+	"authors" : [{
+			"name" : "MichalLuthor",
+			"email" : "michaelluthor@163.com"
+		}
+	],
+	"require" : {
+		"php-webdriver/webdriver" : "^1.8"
+	}
+}
