@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/editor.css">
+  <title>命令编辑</title>
+</head>
+<body>
+  <div id="app">
+    <form class="form-custom-cmd">
+      <div class="form-group">
+        <label>类型</label>
+        <select class="form-control form-control-sm" v-model="category">
+          <option value="action">动作</option>
+          <option value="wait">等待</option>
+          <option value="assert">验证</option>
+          <option value="call">过程调用</option>
+          <option value="request">远程接口调用</option>
+          <option value="response">远程接口响应</option>
+        </select>
+      </div>
+
+      <!-- 远程接口响应 -->
+      <div class="form-group" v-if="category == 'response'">
+        <label>接口名称</label>
+        <input type="text" class="form-control form-control-sm" v-model="param1">
+      </div>
+      <div class="form-group" v-if="category == 'response'">
+        <label>响应内容</label>
+        <textarea class="form-control form-control-sm" v-model="param2"></textarea>
+      </div>
+
+      <!-- 远程接口调用 -->
+      <div class="form-group" v-if="category == 'request'">
+        <label>接口名称</label>
+        <input type="text" class="form-control form-control-sm" v-model="param1">
+      </div>
+      <div class="form-group" v-if="category == 'request'">
+        <label>参数</label>
+        <textarea class="form-control form-control-sm" v-model="param2"></textarea>
+      </div>
+
+      <!-- 过程调用 -->
+      <div class="form-group" v-if="category == 'call'">
+        <label>过程名称</label>
+        <input type="text" class="form-control form-control-sm"  v-model="param1">
+      </div>
+      <div class="form-group" v-if="category == 'call'">
+        <label>参数</label>
+        <input type="text" class="form-control"  v-model="param2">
+        <div>&nbsp;</div>
+        <input type="text" class="form-control" v-model="param3">
+      </div>
+
+      <!-- 验证 -->
+      <div class="form-group" v-if="category == 'assert'">
+        <label>验证</label>
+        <select class="form-control form-control-sm" v-model="name">
+          <option value="assert-url">链接</option>
+          <option value="assert-elem-visible">元素可见</option>
+          <option value="assert-elem-invisible">元素不可见</option>
+          <option value="assert-elem-text">元素文本</option>
+        </select>
+      </div>
+      <div class="form-group" v-if="category == 'assert' && name == 'assert-url'">
+        <label>链接</label>
+        <input type="text" class="form-control form-control-sm" v-model="param1">
+      </div>
+      <div class="form-group" v-if="category == 'assert' && name == 'assert-elem-visible'">
+        <label>元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'assert' && name == 'assert-elem-invisible'">
+        <label>元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'assert' && name == 'assert-elem-text'">
+        <label>元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'assert' && name == 'assert-elem-text'">
+        <label>文本</label>
+        <input type="text" class="form-control form-control-sm" v-model="param2">
+      </div>
+
+      <!-- 等待 -->
+      <div class="form-group" v-if="category == 'wait'">
+        <label>等待</label>
+        <select class="form-control form-control-sm" v-model="name">
+          <option value="wait-url">链接</option>
+          <option value="wait-elem-visible">元素可见</option>
+          <option value="wait-elem-invisible">元素不可见</option>
+          <option value="wait-elem-text">元素文本</option>
+        </select>
+      </div>
+      <div class="form-group" v-if="category == 'wait' && name == 'wait-url'">
+        <label>链接</label>
+        <input type="text" class="form-control form-control-sm" v-model="param1">
+      </div>
+      <div class="form-group" v-if="category == 'wait' && name == 'wait-elem-visible'">
+        <label>元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'wait' && name == 'wait-elem-invisible'">
+        <label>元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'wait' && name == 'wait-elem-text'">
+        <label>元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'wait' && name == 'wait-elem-text'">
+        <label>文本</label>
+        <input type="text" class="form-control form-control-sm" v-model="param2">
+      </div>
+
+      <!-- 动作 -->
+      <div class="form-group" v-if="category == 'action'">
+        <label>动作</label>
+        <select class="form-control form-control-sm" v-model="name">
+          <option value="click">点击</option>
+          <option value="dblclick">双击</option>
+          <option value="input">输入</option>
+          <option value="select">选择</option>
+          <option value="check">勾选</option>
+          <option value="hover">停留</option>
+          <option value="upload">上传</option>
+        </select>
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'click'">
+        <label for="exampleInputPassword1">元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'dblclick'">
+        <label for="exampleInputPassword1">元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'input'">
+        <label for="exampleInputPassword1">元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'input'">
+        <label for="exampleInputPassword1">内容</label>
+        <input type="text" class="form-control form-control-sm" v-model="param2">
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'select'">
+        <label for="exampleInputPassword1">元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'select'">
+        <label for="exampleInputPassword1">取值</label>
+        <input type="text" class="form-control form-control-sm" v-model="param2">
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'check'">
+        <label for="exampleInputPassword1">元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'hover'">
+        <label for="exampleInputPassword1">元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'upload'">
+        <label for="exampleInputPassword1">元素</label>
+        <div class="input-group mb-3 input-group-sm">
+          <input type="text" class="form-control" v-model="param1">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="selectElem('param1')">
+              <i class="fa fa-eyedropper"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" v-if="category == 'action' && name == 'upload'">
+        <label for="exampleInputPassword1">文件</label>
+        <input type="text" class="form-control form-control-sm" v-model="param2">
+      </div>
+      <button type="button" class="btn btn-primary" @click="addCommand">添加</button>
+    </form>
+  </div>
+</body>
+<script src="js/vue.js"></script>
+<script src="js/editor.js"></script>
+</html>

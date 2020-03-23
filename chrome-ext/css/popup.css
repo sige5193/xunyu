@@ -1,0 +1,15 @@
+body {
+  width: 500px;
+}
+.btn-sm-x {
+  padding: 0rem .2rem;
+  font-size: .875rem;
+  line-height: 1.5;
+  border-radius: .2rem;
+}
+.cmd-operation {
+  width: 60px;
+}
+.lbl-cmd-content {
+  word-break: break-all;
+}
