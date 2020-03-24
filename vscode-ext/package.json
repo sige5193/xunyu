@@ -1,0 +1,73 @@
+{
+  "name": "xunyu",
+  "displayName": "xunyu",
+  "description": "a vscode ext for xunyu",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.43.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.xunyuCommandRecorderStart"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.xunyuCommandRecorderStart",
+        "title": "Record New Script"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorFocus",
+          "command": "extension.xunyuCommandRecorderStart",
+          "group": "xunyu"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "荀彧",
+      "properties": {
+        "xunyu.chromePath": {
+          "type": "string",
+          "default": "\"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\"",
+          "description": "Chrome浏览器位置"
+        },
+        "xunyu.chromeExtPath": {
+          "type": "string",
+          "default": "D:\\Flashin\\荀彧\\xunyu\\chrome-ext",
+          "description": "Chrome扩展位置"
+        },
+        "xunyu.chromeExtId" : {
+          "type":"string",
+          "default":"apajegcajemgenjoijknmifjbegjebno",
+          "description": "Chrome扩展ID"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.43.0",
+    "eslint": "^6.8.0",
+    "glob": "^7.1.6",
+    "mocha": "^7.0.1",
+    "typescript": "^3.7.5",
+    "vscode-test": "^1.3.0"
+  },
+  "dependencies": {
+    "nodejs-websocket": "^1.7.2"
+  }
+}
