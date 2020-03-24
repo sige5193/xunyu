@@ -30,11 +30,15 @@ function XYFlushCommandToReceiver() {
    
    if ( 0 == edittingCommands.length ) {
       let catchedCommand = localStorage.getItem("CachedCommand");
-      edittingCommands.push(catchedCommand);
+      if ( null != catchedCommand ) {
+         edittingCommands.push(catchedCommand);
+      }
    }
    
    // 把命令通过websocket发送给接收端
-   commandReceiver.send(JSON.stringify({action:'NEW-COMMANDS',commands:edittingCommands}));
+   if (0 < edittingCommands.length) {
+      commandReceiver.send(JSON.stringify({action:'NEW-COMMANDS',commands:edittingCommands}));
+   }
 }
 
 /**
@@ -66,7 +70,9 @@ function XYMessageHandlerNewCommand( request, sendResponse ) {
 function XYDoneRecording() {
    XYFlushCommandToReceiver();
    commandReceiver.send(JSON.stringify({action:'STOP-RECORDING'}));
-   commandReceiver.close();
+   setTimeout(function() {
+      commandReceiver.close();
+   }, 200);
    chrome.browserAction.setBadgeText({text:'stop'});
 }
 

@@ -58,15 +58,17 @@ new Vue({
       bg.XYDoneRecording();
 
       // 关闭所有窗口， 这将导致浏览器退出
-      chrome.tabs.query({}, function(tabs) {
-        let responesHandler = function( response ) { console.log(response); };
-        debugger;
-        let messageData = {source:'xunyu', action:'DONE-RECORDING'};
-        for ( let i=0; i<tabs.length; i++ ) {
-          chrome.tabs.sendMessage(tabs[i].id, messageData, responesHandler);
-          chrome.tabs.remove(tabs[i].id);
-        }
-      });
+      setTimeout(function() {
+        chrome.tabs.query({}, function(tabs) {
+          let responesHandler = function( response ) { console.log(response); };
+          debugger;
+          let messageData = {source:'xunyu', action:'DONE-RECORDING'};
+          for ( let i=0; i<tabs.length; i++ ) {
+            chrome.tabs.sendMessage(tabs[i].id, messageData, responesHandler);
+            chrome.tabs.remove(tabs[i].id);
+          }
+        });
+      }, 500);
     }
   },
 
