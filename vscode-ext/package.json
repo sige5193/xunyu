@@ -7,7 +7,7 @@
     "vscode": "^1.43.0"
   },
   "categories": [
-    "Other"
+    "Other","Programming Languages","Themes"
   ],
   "activationEvents": [
     "onCommand:extension.xunyuCommandRecorderStart"
@@ -49,7 +49,25 @@
           "description": "Chrome扩展ID"
         }
       }
-    }
+    },
+    "languages": [{
+      "id": "xunyu",
+      "aliases": ["XunYu", "xunyu"],
+      "extensions": [".xy"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+        "language": "xunyu",
+        "scopeName": "source.xy",
+        "path": "./syntaxes/xunyu.tmLanguage.json"
+    }],
+    "themes": [
+      {
+          "label": "xunyu2",
+          "uiTheme": "vs-dark",
+          "path": "./themes/xunyu2-color-theme.json"
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint .",

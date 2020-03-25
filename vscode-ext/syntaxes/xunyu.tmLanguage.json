@@ -1,0 +1,72 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "XunYu",
+  "patterns": [
+    {"include": "#keywords"},
+    {"include": "#strings"},
+    {"include": "#actions"},
+    {"include": "#waittings"},
+    {"include": "#assertions"},
+    {"include": "#elements"},
+    {"include": "#variables"},
+    {"include": "#metas"},
+    {"include": "#comments"}
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [{
+        "name": "keyword.control.xunyu",
+        "match": "^\\s*(call|use|close|if|elseif|else|white|loop|each|endwhile|endloop|endeach|endif|set|return|func|endfunc|include)\\b\\s"
+      }]
+    },
+    "actions" : {
+      "patterns": [{
+        "name":"action.user.xunyu",
+        "match":"^\\s*(click|input|upload|select|dblclick|hover|open|close-tab-by-url)\\b"
+      }]
+    },
+    "waittings" : {
+      "patterns": [{
+        "name" : "waitting.user.xunyu",
+        "match" : "^\\s*wait[a-zA-Z0-9\\-]*"
+      }]
+    },
+    "assertions" : {
+      "patterns": [{
+        "name" : "assertion.user.xunyu",
+        "match": "^\\s*assert[a-zA-Z0-9\\-]*"
+      }]
+    },
+    "elements" : {
+      "patterns": [{
+        "name" : "element.user.xunyu",
+        "match": "\\s#[a-zA-Z0-9_\\-]+"
+      },{
+        "name" : "element.user.xunyu",
+        "match": "\\s/[/\\[\\]a-zA-Z0-9_\\-]+"
+      },{
+        "name" : "element.user.xunyu",
+        "match": "\\s>[^\\s]+"
+      }]
+    },
+    "variables" : {
+      "patterns": [{
+        "name":"variable.user.xunyu",
+        "match": "\\$[a-zA-Z0-9_]+"
+      }]
+    },
+    "metas" : {
+      "patterns": [{
+        "name":"meta.user.xunyu",
+        "match": "^%.*$"
+      }]
+    },
+    "comments" : {
+      "patterns": [{
+        "name":"comment.user.xunyu",
+        "match": "^#.*$"
+      }]
+    }
+  },
+  "scopeName": "source.xy"
+}
