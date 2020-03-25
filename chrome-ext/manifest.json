@@ -26,5 +26,8 @@
     "default_icon": "img/logo.png",
     "default_title": "荀彧自动化测试",
     "default_popup": "popup.html"
-  }
+  },
+  "permissions": [
+    "tabs"
+  ]
 }

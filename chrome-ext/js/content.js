@@ -148,6 +148,10 @@ function XYFormatParam( param ) {
  * 记录点击事件
  */
 function XYRecordActionClick ( event ) {
+  if ( 'input' == event.target.tagName.toLowerCase() && 'file' == event.target.type ) {
+    // input file 不再触发click事件的记录
+    return;
+  }
   XYCommandSend(`click ${XYgetElemSelector(event.target)}`);
 }
 
@@ -157,6 +161,22 @@ function XYRecordActionClick ( event ) {
  */
 function XYRecordActionInput ( event ) {
   XYCommandSend(`input ${XYgetElemSelector(event.target)} ${XYFormatParam(event.target.value)}`);
+}
+
+/**
+ * 记录文件选择
+ */
+function XYRecordActionInputFile( event ) {
+  const reader = new FileReader()
+  reader.readAsDataURL(event.target.files[0]);
+  reader.onload = ()=> {
+    XYCommandSend('-'+JSON.stringify({
+      'action' : 'upload',
+      'elem' : XYgetElemSelector(event.target),
+      'filename' : event.target.files[0].name,
+      'content' : reader.result,
+    }));
+  }
 }
 
 /**
@@ -177,6 +197,7 @@ function XYAfterClicked ( event ) {
     switch ( event.target.type ) {
     case 'password' :
     case 'text' : event.target.addEventListener('change',XYRecordActionInput, true); break;
+    case 'file' : event.target.addEventListener('change',XYRecordActionInputFile, true); break;
     }
     break;
   case 'select' :
