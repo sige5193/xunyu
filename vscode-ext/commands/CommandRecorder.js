@@ -2,7 +2,8 @@
  * 
  */
 const vscode = require('vscode');
-
+const path = require('path');
+const fs = require('fs');
 /**
  * 
  */
@@ -16,15 +17,49 @@ function log( message ) {
 }
 
 /**
+ * 处理复杂的命令
+ * @param {string} command 
+ */
+function handleXCommand( command ) {
+  command = command.substr(1);
+  command = JSON.parse(command);
+  switch ( command.action ) {
+  case 'upload' : 
+    let file = vscode.window.activeTextEditor.document.uri._fsPath;
+    let folder = path.dirname(file);
+    
+    fs.mkdir(`${folder}/resource`, function( err ) {
+      if ( null != err && 'EEXIST' != err.code ) {
+        vscode.window.showErrorMessage(`资源目录创建失败："${folder}/resource"`);
+        return false;
+      }
+      let fileContent = command.content.substr(command.content.indexOf('base64,')+7);
+      let fileBitmap = new Buffer(fileContent, 'base64');
+      fs.writeFileSync(`${folder}/resource/${command.filename}`, fileBitmap);
+
+      vscode.window.activeTextEditor.edit( editBuilder => {
+        let pos = new vscode.Position(vscode.window.activeTextEditor.document.lineCount+1, 0);
+        editBuilder.insert(pos, `upload ${command.elem} "resource/${command.filename}"\n`);
+      });
+    });
+    break;
+  }
+}
+
+/**
  * 将命令写入当前文件
  */
 function writeCommandsToEditor( commands ) {
-  vscode.window.activeTextEditor.edit( editBuilder => {
-    for ( let i=0; i<commands.length; i++ ) {
-      let pos = new vscode.Position(vscode.window.activeTextEditor.document.lineCount+1, 0);
-      editBuilder.insert(pos, `${commands[i]}\n`);
+  for ( let i=0; i<commands.length; i++ ) {
+    if ( '-' == commands[i][0] ) {
+      handleXCommand(commands[i]);
+    } else {
+      vscode.window.activeTextEditor.edit( editBuilder => {
+        let pos = new vscode.Position(vscode.window.activeTextEditor.document.lineCount+1, 0);
+        editBuilder.insert(pos, `${commands[i]}\n`);
+      });
     }
-  });
+  }
 }
 
 /**
