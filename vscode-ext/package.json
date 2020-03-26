@@ -10,7 +10,8 @@
     "Other","Programming Languages","Themes","Snippets"
   ],
   "activationEvents": [
-    "onCommand:extension.xunyuCommandRecorderStart"
+    "onCommand:extension.xunyuCommandRecorderStart",
+    "onCommand:extension.xunyuRunTest"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -18,6 +19,9 @@
       {
         "command": "extension.xunyuCommandRecorderStart",
         "title": "Record New Script"
+      }, {
+        "command": "extension.xunyuRunTest",
+        "title": "Run Test(s)"
       }
     ],
     "menus": {
@@ -25,6 +29,12 @@
         {
           "when": "editorFocus",
           "command": "extension.xunyuCommandRecorderStart",
+          "group": "xunyu"
+        }
+      ],
+      "explorer/context" : [
+        {
+          "command": "extension.xunyuRunTest",
           "group": "xunyu"
         }
       ]

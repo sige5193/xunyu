@@ -7,6 +7,10 @@ const vscode = require('vscode');
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+  vscode.commands.registerCommand("extension.xunyuRunTest", async (fileUri) => {
+    require('./commands/RunTests').start(fileUri);
+  });
+  
   let disposable = vscode.commands.registerCommand('extension.xunyuCommandRecorderStart', function () {
     let recorder = require('./commands/CommandRecorder');
     recorder.start();
