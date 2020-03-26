@@ -1,0 +1,27 @@
+{
+  "if" : {
+    "prefix" : "if",
+    "body" : ["if $1 ","  $2# TODO HERE","endif"],
+    "description":"simple if statement"
+  },
+  "loop" : {
+    "prefix" : "loop",
+    "body" : ["loop $1 => $2", "  $3# TODO HERE", "endloop"],
+    "description" : "simple loop statement"
+  },
+  "each" : {
+    "prefix" : "each",
+    "body" : ["each $1 => $2", "  $3# TODO HERE", "endeach"],
+    "description" : "simple each statement"
+  },
+  "while" : {
+    "prefix" : "while",
+    "body" : ["while $1", "  $2# TODO HERE", "endwhile"],
+    "description" : "simple while statement"
+  },
+  "func" : {
+    "prefix" : "func",
+    "body" : ["func $1 ", "  $2# TODO HERE", "endfunc"],
+    "description" : "simple func statement"
+  }
+}

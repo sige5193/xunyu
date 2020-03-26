@@ -7,7 +7,7 @@
     "vscode": "^1.43.0"
   },
   "categories": [
-    "Other","Programming Languages","Themes"
+    "Other","Programming Languages","Themes","Snippets"
   ],
   "activationEvents": [
     "onCommand:extension.xunyuCommandRecorderStart"
@@ -63,9 +63,15 @@
     }],
     "themes": [
       {
-          "label": "xunyu2",
+          "label": "xunyu",
           "uiTheme": "vs-dark",
           "path": "./themes/xunyu2-color-theme.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "xunyu",
+        "path": "./snippets.json"
       }
     ]
   },
