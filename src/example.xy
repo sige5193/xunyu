@@ -1,20 +1,79 @@
+use browser firefox
+open http://127.0.0.1:8001/demo.php
+click #btn-click-test
+dblclick #btn-dblclick-test
+input #txt-input-test 输入测试
+upload #file-upload-test D:/Bash/bash.md
+hover #blk-hover-test
+select #slt-select-name-test 选项1
+close
+
+use browser ie
+open http://127.0.0.1:8001/demo.php
+click #btn-click-test
+dblclick #btn-dblclick-test
+input #txt-input-test 输入测试
+upload #file-upload-test D:/Bash/bash.md
+hover #blk-hover-test
+select #slt-select-name-test 选项1
+close
+
+
+
+
+use browser ie
+use browser firefox
+use browser chrome 
+use browser chrome 80
+use browser chrome 80 as 采购方
+use browser firefox as 加工厂
+active browser:1
+close
+close 加工厂
+close 采购方
+close browser:2
+close browser:3
+close browser:4
+
+
+
+
+
+
+
+
+
+
+
 % 加工平台询单发布测试
-% @link https://issues.ouyeel.com/WLYDI-9324
+% @jira-link https://issues.ouyeel.com/WLYDI-9324
+% @jira-on-test-passed update-issue-status-passed
+% @jira-on-test-failed update-issue-status-failed
+% @notify develops,managers
 
 # 根据用户名和密码登录到加工平台
 # @returns string
 func login username password 
+  define 登录连接 /html/body/div[3]/div[1]/div/div/div/div[2]/a[1]
+  define 登录按钮 /html/body/div/div/div[2]/div/div/form/div[8]/button
+
+  # 测试 value scope
+  set vcode 1234567890
+  
   open http://10.60.148.66/
-  click /html/body/div[3]/div[1]/div/div/div/div[2]/a[1]
+  click 登录连接
   input #userName $username
   input #password $password
-  click /html/body/div/div/div[2]/div/div/form/div[8]/button
+  input #vcode $vcode
+  click 登录按钮
   wait-url http://10.60.148.66/
   return ok
 endfunc
 
+
 use browser ie
 call login T20433 123456
+
 hover /html/body/div[1]/div/div[2]/div[5]/a
 wait-elem-present /html/body/div[1]/div/div[2]/div[5]/div
 click >询价管理

@@ -7,6 +7,9 @@ use Facebook\WebDriver\Interactions\WebDriverActions;
 use Facebook\WebDriver\WebDriverWait;
 use Facebook\WebDriver\WebDriverExpectedCondition;
 use Facebook\WebDriver\Remote\RemoteWebElement;
+use app\script\ArgumentParser;
+use Facebook\WebDriver\Remote\LocalFileDetector;
+use app\script\Assertion;
 /**
  * @todo 进程意外退出时，浏览器服务没有关闭
  */
@@ -15,13 +18,13 @@ class OperatorBrowser extends BaseOperator {
      * name of browser
      * @var string
      */
-    private $browserName = 'chrome';
+    protected $browserName = 'chrome';
     
     /**
      * version of browser
      * @var string
      */
-    private $version = 'default';
+    protected $version = 'default';
     
     /**
      * @var \Facebook\WebDriver\Remote\RemoteWebDriver
@@ -29,26 +32,25 @@ class OperatorBrowser extends BaseOperator {
     private $driver = null;
     
     /**
-     * @var resource
+     * @var array
      */
-    private $input = null;
+    private $pipes = [];
     
     /**
-     * @var resource
+     * @var string
      */
-    private $output = null;
+    private $cmdPattern = null;
     
     /**
-     * @example use browser
-     * @example use browser chrome
-     * @example use browser chrome 80
+     * {@inheritDoc}
+     * @see \app\operators\BaseOperator::getArgsParser()
      */
-    public function setCmdArgs($args) {
-        if ( !isset($args[0]) ) {
-            throw new \Exception("unable");
-        }
-        $this->browserName = isset($args[0]) ? $args[0] : $this->browserName;
-        $this->version = isset($args[1]) ? $args[1] : $this->version;
+    protected function getArgsParser() {
+        return ArgumentParser::setup()
+        ->addArgument('browserName')->setDefaultValue('browserName', 'chrome')
+        ->addArgument('version')->setDefaultValue('version', 'default')
+        ->addArgument('as')->setIsKeyword('as',true)
+        ->addArgument('operatorName');
     }
 
     /**
@@ -56,12 +58,18 @@ class OperatorBrowser extends BaseOperator {
      * @see \app\operators\IOperator::init()
      */
     public function init() {
-        $inputFile = \Application::app()->getPath('tmp/operator-browser-input');
-        file_put_contents($inputFile, '');
-        $this->input = fopen($inputFile, 'r');
+        $this->pipes['input']['path'] = tempnam(sys_get_temp_dir(), 'XY');
+        file_put_contents($this->pipes['input']['path'], '');
+        $this->pipes['input']['filehandler'] = fopen($this->pipes['input']['path'], 'r');
         
-        $outputFile = \Application::app()->getPath('tmp/operator-browser-output');
-        $this->output = fopen($outputFile, 'w');
+        $this->pipes['output']['path'] = tempnam(sys_get_temp_dir(), 'XY');
+        $this->pipes['output']['filehandler'] = fopen($this->pipes['output']['path'], 'w');
+        
+        $this->pipes['ioe'] = [
+            $this->pipes['input']['filehandler'],
+            $this->pipes['output']['filehandler'],
+            $this->pipes['output']['filehandler']
+        ];
     }
 
     /**
@@ -81,36 +89,43 @@ class OperatorBrowser extends BaseOperator {
      */
     private function startBrowserIe() {
         $plarform = \Application::app()->getPlatformName();
-        $extName = ('windows' === $plarform) ? '.exe' : '';
-        $driverPath = \Application::app()->getPath("platforms/{$plarform}/iedriver-{$this->version}{$extName}");
+        $driverExt = '';
+        switch ( $plarform ) {
+        case 'windows' :
+            $driverExt = '.exe';
+            break;
+        default:
+            throw new \Exception("platform `{$plarform}` has not been supported for browser.");
+        }
+        
+        $driverPath = \Application::app()->getPath("platforms/{$plarform}/iedriver{$driverExt}");
         if ( !file_exists($driverPath) ) {
             throw new \Exception("not supported browser type `{$this->browserName}-v{$this->version}`");
         }
         
-        $cmd = proc_open($driverPath, [$this->input, $this->output, $this->output], $pipes);
+        $port = $this->findAnAvailablePort();
+        switch ( $plarform ) {
+        case 'windows' :
+            $command = "\"\"{$driverPath}\" \"/port={$port}\"\"";
+            $this->cmdPattern = "#iedriver.*?port={$port}#";
+            break;
+        default:
+            $command = "{$driverPath} --port={$port}";
+            break;
+        }
+        
+        $cmd = proc_open($command, $this->pipes['ioe'], $pipes);
         if ( false === $cmd ) {
             throw new \Exception("failed to start webdriver service");
         }
         
-        $isServiceAvailable = false;
-        for ( $i=0; $i<5; $i++ ) {
-            sleep(1);
-            $fp = @fsockopen('127.0.0.1', 5555, $errno, $errstr, 0.1);
-            if (false !== $fp) {
-                fclose($fp);
-                $isServiceAvailable = true;
-                break;
-            }
-        }
-        if ( !$isServiceAvailable ) {
-            throw new \Exception("unable to connect to webdriver service");
-        }
+        $this->waitForWebdriverServer($port);
         
         # close cmd but not the webdriver service
         proc_terminate($cmd);
         proc_close($cmd);
         
-        $host = 'http://127.0.0.1:5555';
+        $host = "http://127.0.0.1:{$port}";
         $dc = DesiredCapabilities::internetExplorer();
         $dc->setCapability('ignoreProtectedModeSettings', true);
         $dc->setCapability('ignoreZoomSetting', true);
@@ -120,39 +135,86 @@ class OperatorBrowser extends BaseOperator {
     
     /**
      * @throws \Exception
+     * @link https://stackoverflow.com/questions/41133391/which-chromedriver-version-is-compatible-with-which-chrome-browser-version
      */
     private function startBrowserChrome() {
+        $driverVersion = null;
+        $driverExt = '';
+        
         $plarform = \Application::app()->getPlatformName();
-        $extName = ('windows' === $plarform) ? '.exe' : '';
-        $driverPath = \Application::app()->getPath("platforms/{$plarform}/chromedriver-{$this->version}{$extName}");
+        switch ( $plarform ) {
+        case 'windows' :
+            $chromePath = trim(shell_exec("where chrome.exe"));
+            if ( empty($chromePath) ) {
+                throw new \Exception("unable to find chrome.exe, please make sure you have chrome.exe in your PATH.");
+            }
+            
+            $chromePath = str_replace('\\', '\\\\', $chromePath);
+            $chromeVersion = trim(shell_exec("wmic datafile where name=\"{$chromePath}\" get Version /value"));
+            $chromeVersion = explode('.', str_replace('Version=', '', $chromeVersion));
+            $chromeVersion = intval($chromeVersion[0]);
+            if ( 'default' !== $this->version && $this->version != $chromeVersion ) {
+                throw new \Exception("test case requires chrome {$this->versio} but your chrome is version {$chromeVersion}");
+            }
+            $driverExt = '.exe';
+            break;
+        default:
+            throw new \Exception("platform `{$plarform}` has not been supported for browser.");
+        }
+        
+        $browserDriverVersionmap = [
+            '72'=>'2.46','71'=>'2.46','70'=>'2.45','69'=>'2.44','68'=>'2.43',
+            '67'=>'2.41','66'=>'2.40','65'=>'2.38','64'=>'2.37','63'=>'2.36',
+            '62'=>'2.35','61'=>'2.34','60'=>'2.33'
+        ];
+        
+        if ( 73 <= $chromeVersion ) {
+            $driverVersion = $chromeVersion;
+        } else if ( isset($browserDriverVersionmap[$chromeVersion]) ) {
+            $driverVersion = $browserDriverVersionmap[$chromeVersion];
+        } else if ( 57 <= $chromeVersion ) {
+            $driverVersion = '2.28';
+        } else if ( 54 <= $chromeVersion ) {
+            $driverVersion = '2.25';
+        } else if ( 53 <= $chromeVersion ) {
+            $driverVersion = '2.24';
+        } else if ( 51 <= $chromeVersion ) {
+            $driverVersion = '2.22';
+        } else if ( 44 <= $chromeVersion ) {
+            $driverVersion = '2.19';
+        } else if ( 42 <= $chromeVersion ) {
+            $driverVersion = '2.15';
+        } else {
+            throw new \Exception("unable to match webdriver version for chrome v{$chromeVersion}");
+        }
+        
+        $driverPath = \Application::app()->getPath("platforms/{$plarform}/chromedriver-{$driverVersion}{$driverExt}");
         if ( !file_exists($driverPath) ) {
             throw new \Exception("not supported browser type `{$this->browserName}-v{$this->version}`");
         }
         
-        $cmd = proc_open($driverPath, [$this->input, $this->output, $this->output], $pipes);
+        $port = $this->findAnAvailablePort();
+        
+        switch ( $plarform ) {
+        case 'windows' :
+            $command = "\"\"{$driverPath}\" \"--port={$port}\"\"";
+            $this->cmdPattern = "#chromedriver.*?--port={$port}#";
+            break;
+        default:
+            $command = "{$driverPath} --port={$port}";
+            break;
+        }
+        
+        $cmd = proc_open($command, $this->pipes['ioe'], $pipes);
         if ( false === $cmd ) {
             throw new \Exception("failed to start webdriver service");
         }
         
-        $isServiceAvailable = false;
-        for ( $i=0; $i<5; $i++ ) {
-            sleep(1);
-            $fp = @fsockopen('127.0.0.1', 9515, $errno, $errstr, 0.1);
-            if (false !== $fp) {
-                fclose($fp);
-                $isServiceAvailable = true;
-                break;
-            }
-        }
-        if ( !$isServiceAvailable ) {
-            throw new \Exception("unable to connect to webdriver service");
-        }
-        
-        # close cmd but not the webdriver service
+        $this->waitForWebdriverServer($port);
         proc_terminate($cmd);
         proc_close($cmd);
         
-        $host = 'http://localhost:9515';
+        $host = "http://127.0.0.1:{$port}";
         $this->driver = RemoteWebDriver::create($host, DesiredCapabilities::chrome());
     }
     
@@ -161,19 +223,72 @@ class OperatorBrowser extends BaseOperator {
      */
     private function startBrowserFirefox() {
         $plarform = \Application::app()->getPlatformName();
-        $extName = ('windows' === $plarform) ? '.exe' : '';
-        $driverPath = \Application::app()->getPath("platforms/{$plarform}/firefoxdriver-{$this->version}{$extName}");
-        if ( !file_exists($driverPath) ) {
-            throw new \Exception("not supported browser type `{$this->browserName}-v{$this->version}`");
+        $driverExt = '';
+        
+        switch ( $plarform ) {
+        case 'windows' :
+            $firefoxPath = trim(shell_exec("where firefox.exe"));
+            if ( empty($firefoxPath) ) {
+                throw new \Exception("unable to find firefox.exe, please make sure you have firefox.exe in your PATH.");
+            }
+            $driverExt = '.exe';
+            
+            break;
+        default:
+            throw new \Exception("platform `{$plarform}` has not been supported for browser.");
         }
         
-        $port = 4444;
-        $startCmd = "\"\"{$driverPath}\" \"-p\" \"{$port}\" \"-vv\"\"";
-        $cmd = proc_open($startCmd, [$this->input, $this->output, $this->output], $pipes);
+        $driverPath = \Application::app()->getPath("platforms/{$plarform}/firefoxdriver{$driverExt}");
+        if ( !file_exists($driverPath) ) {
+            throw new \Exception("unable to find firefox webdriver");
+        }
+        
+        $port = $this->findAnAvailablePort();
+        switch ( $plarform ) {
+        case 'windows' :
+            $command = "\"\"{$driverPath}\" \"--port\" \"{$port}\" \"-vv\"\"";
+            $this->cmdPattern = "#firefoxdriver.*?-port.*?{$port}#";
+            break;
+        default:
+            $command = "{$driverPath} -p {$port}";
+            break;
+        }
+        $cmd = proc_open($command, $this->pipes['ioe'], $pipes);
         if ( false === $cmd ) {
             throw new \Exception("failed to start webdriver service");
         }
         
+        $this->waitForWebdriverServer($port);
+        
+        # close cmd but not the webdriver service
+        proc_terminate($cmd);
+        proc_close($cmd);
+        
+        $host = "http://127.0.0.1:{$port}";
+        $this->driver = RemoteWebDriver::create($host, DesiredCapabilities::firefox());
+    }
+    
+    /**
+     * find a available port to use
+     * @return integer
+     */
+    private function findAnAvailablePort() {
+        $port = 65534;
+        while ( 0 < $port ) {
+            $fp = @fsockopen('127.0.0.1', $port, $errno, $errstr, 5);
+            if (false === $fp) {
+                return $port;
+            }
+            fclose($fp);
+            $port --;
+        }
+        throw new \Exception('unable to find an available port for webdriver server');
+    }
+    
+    /**
+     * @param integer $port
+     */
+    private function waitForWebdriverServer( $port ) {
         $isServiceAvailable = false;
         for ( $i=0; $i<5; $i++ ) {
             sleep(1);
@@ -187,30 +302,31 @@ class OperatorBrowser extends BaseOperator {
         if ( !$isServiceAvailable ) {
             throw new \Exception("unable to connect to webdriver service");
         }
-        
-        # close cmd but not the webdriver service
-        proc_terminate($cmd);
-        proc_close($cmd);
-        
-        $host = "http://127.0.0.1:{$port}";
-        $this->driver = RemoteWebDriver::create($host, DesiredCapabilities::firefox());
     }
-
+    
     /**
      * {@inheritDoc}
      * @see \app\operators\IOperator::stop()
      */
     public function stop() {
-        $this->driver->close();
+        $this->driver->quit();
         
-        # end the webdriver service
-        $terminateOutput = null;
-        $terminateReturnVar = null;
-        switch ( $this->browserName ) {
-        case 'ie' : exec("taskkill /F /im iedriver-default.exe", $terminateOutput, $terminateReturnVar); break;
-        case 'chrome' : exec("taskkill /F /im chromedriver-80.exe", $terminateOutput, $terminateReturnVar); break;
-        case 'firefox' : exec("taskkill /F /im firefoxdriver-default.exe", $terminateOutput, $terminateReturnVar); break;
-        default : throw new \Exception('not handled'); break;
+        $plarform = \Application::app()->getPlatformName();
+        switch ( $plarform ) {
+        case 'windows' :
+            exec('WMIC PROCESS get Processid,Commandline', $output);
+            foreach ( $output as $outputLine ) {
+                if ( '' === trim($outputLine) || !preg_match($this->cmdPattern, $outputLine) ) {
+                    continue;
+                }
+                preg_match('#\\d+$#', $outputLine, $matchedPid);
+                exec("taskkill /F /PID {$matchedPid[0]}");
+                break;
+            }
+            break;
+        default:
+            throw new \Exception("platform `{$plarform}` has not been supported for browser.");
+            break;
         }
     }
 
@@ -219,10 +335,10 @@ class OperatorBrowser extends BaseOperator {
      * @see \app\operators\IOperator::destory()
      */
     public function destory() {
-        fclose($this->input);
-        fclose($this->output);
-        unlink(\Application::app()->getPath('tmp/operator-browser-input'));
-        unlink(\Application::app()->getPath('tmp/operator-browser-output'));
+        fclose($this->pipes['input']['filehandler']);
+        fclose($this->pipes['output']['filehandler']);
+        unlink($this->pipes['input']['path']);
+        unlink($this->pipes['output']['path']);
     }
     
     /**
@@ -240,11 +356,34 @@ class OperatorBrowser extends BaseOperator {
     }
     
     /**
+     * trigger double click event on an element
+     * @param string $selector
+     */
+    public function cmdDblclick( $selector ) {
+        $action = new WebDriverActions($this->driver);
+        $action->doubleClick($this->driver->findElement($this->parseSelector($selector)))->perform();
+    }
+    
+    /**
      * @param unknown $selector
      * @param unknown $content
      */
     public function cmdInput( $selector, $content ) {
         $this->driver->findElement($this->parseSelector($selector))->sendKeys($content);
+    }
+    
+    /**
+     * @param unknown $selector
+     * @param unknown $path
+     */
+    public function cmdUpload($selector, $path) {
+        $elem = $this->driver->findElement($this->parseSelector($selector));
+        if ( 'ie' === $this->browserName ) {
+            $path = str_replace('/', '\\', $path);
+            $elem->sendKeys($path);
+        } else {
+            $elem->setFileDetector(new LocalFileDetector())->sendKeys($path);
+        }
     }
     
     /**
@@ -257,29 +396,224 @@ class OperatorBrowser extends BaseOperator {
     
     /**
      * @param unknown $selector
-     * @param unknown $timeout
+     * @param unknown $text
      */
-    public function cmdWaitElemPresent ( $selector, $timeout=null ) {
+    public function cmdSelect( $selector, $text ) {
+        $select = $this->driver->findElement($this->parseSelector($selector));
+        $options = $select->findElements(WebDriverBy::tagName('option'));
+        foreach ( $options as $option ) {
+            /** @var RemoteWebElement $option */
+            if ( trim($text) === trim($option->getText()) ) {
+                $option->click();
+            }
+        }
+    }
+    
+    /**
+     * 
+     */
+    public function cmdAlertAccept() {
+        $this->driver->switchTo()->alert()->accept();
+    }
+    
+    /**
+     * 
+     */
+    public function cmdAlertDismiss() {
+        $this->driver->switchTo()->alert()->dismiss();
+    }
+    
+    /**
+     * @param unknown $value
+     */
+    public function cmdAlertInput($value) {
+        $this->driver->switchTo()->alert()->sendKeys($value);
+    }
+    
+    /**
+     * @param unknown $title
+     */
+    public function cmdWaitTitle( $title, $timeout=null ) {
         $wait = new WebDriverWait($this->driver, $timeout);
-        $wait->until(WebDriverExpectedCondition::visibilityOf($this->driver->findElement($this->parseSelector($selector))));
+        if ( '/' === $title[0] ) {
+            $wait->until(WebDriverExpectedCondition::titleMatches($title));
+        } else {
+            $wait->until(WebDriverExpectedCondition::titleIs($title));
+        }
     }
     
     /**
      * @param unknown $url
-     * @example wait-url http://www.google.com
+     * @param unknown $timeout
      */
     public function cmdWaitUrl( $url, $timeout=null ) {
         $wait = new WebDriverWait($this->driver, $timeout);
-        $wait->until(WebDriverExpectedCondition::urlIs($url));
+        if ( '/' === $url[0] ) {
+            $wait->until(WebDriverExpectedCondition::urlMatches($url));
+        } else {
+            $wait->until(WebDriverExpectedCondition::urlIs($url));
+        }
     }
     
     /**
-     * @param unknown $elem
+     * @param unknown $selector
+     * @param unknown $timeout
+     */
+    public function cmdWaitElemExists( $selector, $timeout=null ) {
+        $by = $this->parseSelector($selector);
+        $wait = new WebDriverWait($this->driver, $timeout);
+        $wait->until(WebDriverExpectedCondition::presenceOfElementLocated($by));
+    }
+    
+    /**
+     * @param unknown $selector
+     * @param unknown $timeout
+     */
+    public function cmdWaitElemVisiable( $selector, $timeout=null ) {
+        $by = $this->driver->findElement($this->parseSelector($selector));
+        $wait = new WebDriverWait($this->driver, $timeout);
+        $wait->until(WebDriverExpectedCondition::visibilityOf($by));
+    }
+    
+    /**
+     * @param unknown $selector
+     * @param unknown $timeout
+     */
+    public function cmdWaitElemInvisible( $selector, $timeout=null ) {
+        $by = $this->parseSelector($selector);
+        $wait = new WebDriverWait($this->driver, $timeout);
+        $wait->until(WebDriverExpectedCondition::invisibilityOfElementLocated($by));
+    }
+    
+    /**
+     * @param unknown $selector
      * @param unknown $text
+     * @param unknown $timeout
      */
     public function cmdWaitElemText( $selector, $text, $timeout=null ) {
+        $by = $this->parseSelector($selector);
         $wait = new WebDriverWait($this->driver, $timeout);
-        $wait->until(WebDriverExpectedCondition::elementTextIs($this->parseSelector($selector), $text));
+        if ( '/' === $text[0] ) {
+            $wait->until(WebDriverExpectedCondition::elementTextMatches($by, $text));
+        } else {
+            $wait->until(WebDriverExpectedCondition::elementTextIs($by, $text));
+        }
+    }
+    
+    /**
+     * 
+     */
+    public function cmdWaitAlertPresent( $timeout=null ) {
+        $wait = new WebDriverWait($this->driver, $timeout);
+        $wait->until(WebDriverExpectedCondition::alertIsPresent());
+    }
+    
+    /**
+     * @param unknown $title
+     */
+    public function cmdAssertTitle( $title, $message=null ) {
+        $assertion = new Assertion();
+        $assertion->message = $message;
+        $assertion->expect = $title;
+        $assertion->actual = $this->driver->getTitle();
+        
+        if ( '/' === $title[0] ) {
+            $assertion->name = 'browser title matches';
+            $assertion->assertMatch();
+        } else {
+            $assertion->name = 'browser title equals';
+            $assertion->assertEqual();
+        }
+    }
+    
+    /**
+     * @param unknown $url
+     * @param unknown $timeout
+     */
+    public function cmdAssertUrl( $url, $message=null ) {
+        $assertion = new Assertion();
+        $assertion->message = $message;
+        $assertion->expect = $url;
+        $assertion->actual = $this->driver->getCurrentURL();
+        
+        if ( '/' === $url[0] ) {
+            $assertion->name = 'browser url matches';
+            $assertion->assertMatch();
+        } else {
+            $assertion->name = 'browser url equals';
+            $assertion->assertEqual();
+        }
+    }
+    
+    /**
+     * @param unknown $selector
+     * @param unknown $timeout
+     */
+    public function cmdAssertElemExists( $selector, $message=null ) {
+        $assertion = new Assertion();
+        $assertion->message = $message;
+        $assertion->expect = true;
+        $assertion->actual = !empty($this->driver->findElements($this->parseSelector($selector)));
+        $assertion->name = 'browser document element exists';
+        $assertion->assertEqual();
+    }
+    
+    /**
+     * @param unknown $selector
+     * @param unknown $timeout
+     */
+    public function cmdAssertElemVisiable( $selector, $message=null ) {
+        $assertion = new Assertion();
+        $assertion->message = $message;
+        $assertion->expect = true;
+        $assertion->actual = $this->driver->findElement($this->parseSelector($selector))->isDisplayed();
+        $assertion->name = 'browser document element visiable';
+        $assertion->assertEqual();
+    }
+    
+    /**
+     * @param unknown $selector
+     * @param unknown $timeout
+     */
+    public function cmdAssertElemInvisible( $selector, $message=null ) {
+        $assertion = new Assertion();
+        $assertion->message = $message;
+        $assertion->expect = false;
+        $assertion->actual = !$this->driver->findElement($this->parseSelector($selector))->isDisplayed();
+        $assertion->name = 'browser document element invisiable';
+        $assertion->assertEqual();
+    }
+    
+    /**
+     * @param unknown $selector
+     * @param unknown $text
+     * @param unknown $timeout
+     */
+    public function cmdAssertElemText( $selector, $text, $message=null ) {
+        $assertion = new Assertion();
+        $assertion->message = $message;
+        $assertion->expect = $text;
+        $assertion->actual = $this->driver->findElement($this->parseSelector($selector))->getText();
+        
+        if ( '/' === $text[0] ) {
+            $assertion->name = 'browser document element text matches';
+            $assertion->assertMatch();
+        } else {
+            $assertion->name = 'browser document element text equels';
+            $assertion->assertEqual();
+        }
+    }
+    
+    /**
+     *
+     */
+    public function cmdAssertAlertPresent( $message=null ) {
+        $assertion = new Assertion();
+        $assertion->message = $message;
+        $assertion->expect = true;
+        $assertion->actual = null !== WebDriverExpectedCondition::alertIsPresent();
+        $assertion->name = 'browser document element invisiable';
+        $assertion->assertEqual();
     }
     
     /**
@@ -311,21 +645,6 @@ class OperatorBrowser extends BaseOperator {
         $tabs = $this->driver->getWindowHandles();
         if ( !empty($tabs) ) {
             $this->driver->switchTo()->window($tabs[0]);
-        }
-    }
-    
-    /**
-     * @param unknown $selector
-     * @param unknown $text
-     */
-    public function cmdSelect( $selector, $text ) {
-        $select = $this->driver->findElement($this->parseSelector($selector));
-        $options = $select->findElements(WebDriverBy::tagName('option'));
-        foreach ( $options as $option ) {
-            /** @var RemoteWebElement $option */
-            if ( trim($text) === trim($option->getText()) ) {
-                $option->click();
-            }
         }
     }
     

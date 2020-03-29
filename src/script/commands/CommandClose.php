@@ -11,7 +11,7 @@ class CommandClose extends BaseCommand {
      * @see \app\script\commands\ICommand::setCmdArgs()
      */
     public function setCmdArgs($args) {
-        $this->operatorName = $args[0];
+        $this->operatorName = isset($args[0]) ? $args[0] : null;
     }
 
     /**
@@ -19,14 +19,13 @@ class CommandClose extends BaseCommand {
      * @see \app\script\commands\ICommand::exec()
      */
     public function exec(\app\script\Runtime $runtime) {
-        /** @var IOperator $curOperator */
-        $curOperator = $runtime->getData('ActiveOperator');
-        if ( null === $curOperator ) {
-            throw new \Exception("no actived opertor");
+        if ( null === $this->operatorName ) {
+            $this->operatorName = $runtime->getActiveOperatorName();
         }
+        $operator = $runtime->getOperator($this->operatorName);
         
-        $curOperator->stop();
-        $curOperator->destory();
-        $runtime->setData('ActiveOperator', null);
+        $operator->stop();
+        $operator->destory();
+        $runtime->unloadOperator($this->operatorName);
     }
 }

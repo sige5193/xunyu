@@ -2,9 +2,7 @@
 namespace app\script\commands;
 use app\script\Runtime;
 use app\operators\IOperator;
-
 /**
- * @example use browser chrome
  * @author sige
  */
 class CommandUse extends BaseCommand {
@@ -21,12 +19,28 @@ class CommandUse extends BaseCommand {
     private $params = [];
     
     /**
+     * name of operator
+     * @var string
+     */
+    private $alias = null;
+    
+    /**
+     * @var array
+     */
+    private static $operatorCounter = array();
+    
+    /**
      * {@inheritDoc}
      * @see \app\script\commands\ICommand::setCmdArgs()
      */
     public function setCmdArgs($args) {
         $this->operatorName = array_shift($args);
         $this->params = $args;
+        
+        # setup alias for operator
+        if ( 2 <= count($args) && 'as' === strtolower($args[count($args)-2]) ) {
+            $this->alias = trim($args[count($args)-1]);
+        }
     }
     
     /**
@@ -40,19 +54,22 @@ class CommandUse extends BaseCommand {
             throw new \Exception("unknown operator : {$this->operatorName}");
         }
         
-        /** @var IOperator $curOperator */
-        $curOperator = $runtime->getData('ActiveOperator');
-        if ( null !== $curOperator ) {
-            $curOperator->stop();
-            $curOperator->destory();
-        }
-        
         /** @var IOperator $operator */
         $operator = new $operatorClass();
         $operator->setCmdArgs($this->params);
         $operator->init();
         $operator->start();
         
-        $runtime->setData('ActiveOperator', $operator);
+        if ( !isset(self::$operatorCounter[$this->operatorName]) ) {
+            self::$operatorCounter[$this->operatorName] = 0;
+        }
+        self::$operatorCounter[$this->operatorName] ++;
+        
+        if ( null === $this->alias ) {
+            $counter = self::$operatorCounter[$this->operatorName];
+            $this->alias = "{$this->operatorName}:{$counter}";
+        }
+        
+        $runtime->loadOperator($this->alias, $operator);
     }
 }

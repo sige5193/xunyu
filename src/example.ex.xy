@@ -1,0 +1,275 @@
+use browser chrome
+open http://127.0.0.1:8001/demo.php
+assert-title 测试标题
+assert-title /标题/
+assert-url http://127.0.0.1:8001/demo.php
+assert-url /demo/
+assert-elem-exists #elem-exists
+assert-elem-visiable #elem-visiable
+assert-elem-invisible #elem-invisible
+assert-elem-text #elem-text 断言测试
+assert-elem-text #elem-text /断言/
+click #assert-alert-test
+assert-alert-present 
+alert-accept
+close
+
+use browser firefox
+open http://127.0.0.1:8001/demo.php
+assert-title 测试标题
+assert-title /标题/
+assert-url http://127.0.0.1:8001/demo.php
+assert-url /demo/
+assert-elem-exists #elem-exists
+assert-elem-visiable #elem-visiable
+assert-elem-invisible #elem-invisible
+assert-elem-text #elem-text 断言测试
+assert-elem-text #elem-text /断言/
+click #assert-alert-test
+assert-alert-present 
+alert-accept
+close
+
+use browser ie
+open http://127.0.0.1:8001/demo.php
+assert-title 测试标题
+assert-title /标题/
+assert-url http://127.0.0.1:8001/demo.php
+assert-url /demo/
+assert-elem-exists #elem-exists
+assert-elem-visiable #elem-visiable
+assert-elem-invisible #elem-invisible
+assert-elem-text #elem-text 断言测试
+assert-elem-text #elem-text /断言/
+click #assert-alert-test
+assert-alert-present 
+alert-accept
+close
+
+
+
+
+
+
+use browser ie
+use browser firefox
+use browser chrome 
+use browser chrome 80
+use browser chrome 80 as 采购方
+use browser firefox as 加工厂
+active browser:1
+close
+close 加工厂
+close 采购方
+close browser:2
+close browser:3
+close browser:4
+
+
+
+
+
+
+use browser chrome
+open http://127.0.0.1:8001/demo.php
+click #btn-click-test
+dblclick #btn-dblclick-test
+input #txt-input-test 输入测试
+upload #file-upload-test D:/Bash/bash.md
+hover #blk-hover-test
+select #slt-select-name-test 选项1
+close
+
+use browser firefox
+open http://127.0.0.1:8001/demo.php
+click #btn-click-test
+dblclick #btn-dblclick-test
+input #txt-input-test 输入测试
+upload #file-upload-test D:/Bash/bash.md
+hover #blk-hover-test
+select #slt-select-name-test 选项1
+close
+
+use browser ie
+open http://127.0.0.1:8001/demo.php
+click #btn-click-test
+dblclick #btn-dblclick-test
+input #txt-input-test 输入测试
+upload #file-upload-test D:/Bash/bash.md
+hover #blk-hover-test
+select #slt-select-name-test 选项1
+close
+
+
+
+
+
+
+use browser chrome
+open http://127.0.0.1:8001/demo.php
+click #wait-start-tfm
+wait-title 标题完整匹配
+input #title-full-match 测试成功
+click #wait-start-trm
+wait-title /正则匹配/
+input #title-reg-match 测试成功
+click #wait-start-ufm
+wait-url http://127.0.0.1:8001/demo.php?test-full-match=1
+input #url-full-match 测试成功
+click #wait-start-urm
+wait-url http://127.0.0.1:8001/demo.php?test-reg-match=1
+input #url-reg-match 测试成功
+click #wait-start-ep
+wait-elem-exists #ep-new-elem
+input #elem-present 测试成功
+click #wait-start-ev
+wait-elem-visiable #elem-visiable-test
+input #elem-visiable 测试成功
+click #wait-start-ei
+wait-elem-invisible #elem-invisiable-test
+input #elem-invisiable 测试成功
+click #wait-start-etfm
+wait-elem-text #elem-txt-full-match 全文匹配
+input #elem-text-full-match 测试成功
+click #wait-start-etrm
+wait-elem-text #elem-txt-reg-match /正则/
+input #elem-text-reg-match 测试成功
+click #wait-start-ap
+wait-alert-present
+alert-accept
+input #alert-present 测试成功
+close
+
+use browser firefox
+open http://127.0.0.1:8001/demo.php
+click #wait-start-tfm
+wait-title 标题完整匹配
+input #title-full-match 测试成功
+click #wait-start-trm
+wait-title /正则匹配/
+input #title-reg-match 测试成功
+click #wait-start-ufm
+wait-url http://127.0.0.1:8001/demo.php?test-full-match=1
+input #url-full-match 测试成功
+click #wait-start-urm
+wait-url http://127.0.0.1:8001/demo.php?test-reg-match=1
+input #url-reg-match 测试成功
+click #wait-start-ep
+wait-elem-exists #ep-new-elem
+input #elem-present 测试成功
+click #wait-start-ev
+wait-elem-visiable #elem-visiable-test
+input #elem-visiable 测试成功
+click #wait-start-ei
+wait-elem-invisible #elem-invisiable-test
+input #elem-invisiable 测试成功
+click #wait-start-etfm
+wait-elem-text #elem-txt-full-match 全文匹配
+input #elem-text-full-match 测试成功
+click #wait-start-etrm
+wait-elem-text #elem-txt-reg-match /正则/
+input #elem-text-reg-match 测试成功
+click #wait-start-ap
+wait-alert-present
+alert-accept
+input #alert-present 测试成功
+close
+
+use browser ie
+open http://127.0.0.1:8001/demo.php
+click #wait-start-tfm
+wait-title 标题完整匹配
+input #title-full-match 测试成功
+click #wait-start-trm
+wait-title /正则匹配/
+input #title-reg-match 测试成功
+click #wait-start-ufm
+wait-url http://127.0.0.1:8001/demo.php?test-full-match=1
+input #url-full-match 测试成功
+click #wait-start-urm
+wait-url http://127.0.0.1:8001/demo.php?test-reg-match=1
+input #url-reg-match 测试成功
+click #wait-start-ep
+wait-elem-exists #ep-new-elem
+input #elem-present 测试成功
+click #wait-start-ev
+wait-elem-visiable #elem-visiable-test
+input #elem-visiable 测试成功
+click #wait-start-ei
+wait-elem-invisible #elem-invisiable-test
+input #elem-invisiable 测试成功
+click #wait-start-etfm
+wait-elem-text #elem-txt-full-match 全文匹配
+input #elem-text-full-match 测试成功
+click #wait-start-etrm
+wait-elem-text #elem-txt-reg-match /正则/
+input #elem-text-reg-match 测试成功
+click #wait-start-ap
+wait-alert-present
+alert-accept
+input #alert-present 测试成功
+close
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% 加工平台询单发布测试
+% @jira-link https://issues.ouyeel.com/WLYDI-9324
+% @jira-on-test-passed update-issue-status-passed
+% @jira-on-test-failed update-issue-status-failed
+% @notify develops,managers
+
+# 根据用户名和密码登录到加工平台
+# @returns string
+func login username password 
+  define 登录连接 /html/body/div[3]/div[1]/div/div/div/div[2]/a[1]
+  define 登录按钮 /html/body/div/div/div[2]/div/div/form/div[8]/button
+
+  # 测试 value scope
+  set vcode 1234567890
+  
+  open http://10.60.148.66/
+  click 登录连接
+  input #userName $username
+  input #password $password
+  input #vcode $vcode
+  click 登录按钮
+  wait-url http://10.60.148.66/
+  return ok
+endfunc
+
+
+use browser ie
+call login T20433 123456
+
+hover /html/body/div[1]/div/div[2]/div[5]/a
+wait-elem-present /html/body/div[1]/div/div[2]/div[5]/div
+click >询价管理
+close-tab-by-url http://10.60.148.66/
+wait-url http://10.60.148.66/main?t=buy&fv=OrderManage&sv=all&m=inquiry&s=lists
+click >发布询价单
+click >剪切加工询价单
+wait-elem-present #myLargeModalLabel_1
+select #varietys 委托协议下单
+if $value eq 1
+  input /html/body/div/div/div[5]/form/div[4]/div[7]/div[3]/div[2]/div[1]/input 18068708790
+  click #submitSave
+endif
+loop 5 => index
+  input /html/body/div/div/div[5]/form/div[4]/div[7]/div[3]/div[2]/div[1]/input[$index] 18068708790
+endloop
+wait-elem-text /html/body/div/div/div/div[2]/div/div[2]/div[1]/p[1]/b 您的加工单已成功发送!
+assert-elem-text /html/body/div/div/div/div[2]/div/div[2]/div[1]/p[1]/b 您的加工单已成功发送!
+close browser

@@ -9,6 +9,11 @@ class Application {
     private static $app = null;
     
     /**
+     * @var Runtime
+     */
+    private $runtime = null;
+    
+    /**
      * @return self
      */
     public static function app() {
@@ -24,6 +29,8 @@ class Application {
      */
     private function __construct() {
         spl_autoload_register([$this, '_autoloader']);
+        register_shutdown_function([$this, '_shutdown']);
+        pcntl_signal();
     }
     
     /**
@@ -55,6 +62,13 @@ class Application {
     }
     
     /**
+     * 
+     */
+    public function _shutdown() {
+        $this->runtime->shutdown();
+    }
+    
+    /**
      * @return void
      */
     public function start() {
@@ -65,16 +79,24 @@ class Application {
         }
         
         $parser = new Parser();
-        $runtime = new Runtime();
+        $this->runtime = $runtime = new Runtime();
         
         $file = $argv[0];
         $commands = file($file);
         
         foreach ( $commands as $commandText ) {
             $commandText = trim($commandText);
+            if ( empty($commandText) ) {
+                continue;
+            }
             echo "> {$commandText}\n";
-            $command = $parser->parse($commandText);
-            $runtime->execCommand($command);
+            try {
+                $command = $parser->parse($commandText);
+                $runtime->execCommand($command);
+            } catch ( Exception $e ) {
+                echo "\n\nERROR : {$e->getMessage()}\n";
+                exit();
+            }
         }
     }
 }

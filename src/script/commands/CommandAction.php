@@ -1,5 +1,7 @@
 <?php
 namespace app\script\commands;
+use app\script\Runtime;
+
 /**
  * @author sige
  */
@@ -29,20 +31,17 @@ class CommandAction implements ICommand {
      * {@inheritDoc}
      * @see \app\script\commands\ICommand::exec()
      */
-    public function exec(\app\script\Runtime $runtime) {
+    public function exec(Runtime $runtime) {
         /** @var IOperator $curOperator */
-        $curOperator = $runtime->getData('ActiveOperator');
-        if ( null === $curOperator ) {
-            throw new \Exception('no active operator');
-        }
+        $operator = $runtime->getActiveOperator();
         
         $action = explode('-', $this->name);
         $action = array_map('ucfirst', $action);
         $action = 'cmd'.implode('', $action);
-        if ( !is_callable([$curOperator, $action]) ) {
+        if ( !is_callable([$operator, $action]) ) {
             throw new \Exception("invalid operator action : '{$this->name}'");
         }
         
-        call_user_func_array([$curOperator, $action], $this->params);
+        call_user_func_array([$operator, $action], $this->params);
     }
 }
