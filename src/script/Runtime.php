@@ -14,10 +14,28 @@ class Runtime {
     private $activatedOperatorName = null;
     
     /**
-     * place where command to store runtime data
      * @var array
      */
-    private $data = array();
+    private $variables = array();
+    
+    /**
+     * @param unknown $name
+     * @param unknown $value
+     */
+    public function variableSet( $name, $value ) {
+        $this->variables[$name] = $value;
+    }
+    
+    /**
+     * @param unknown $name
+     */
+    public function variableGet( $name ) {
+        if ( array_key_exists($name, $this->variables) ) {
+            return $this->variables[$name];
+        } else {
+            return '';
+        }
+    }
     
     /**
      * @param string $name

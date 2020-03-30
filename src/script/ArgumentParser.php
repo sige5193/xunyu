@@ -119,6 +119,19 @@ class ArgumentParser {
     }
     
     /**
+     * @param unknown $args
+     * @throws \Exception
+     * @return \app\script\ArgumentParser
+     */
+    public function parseOrDie($args) {
+        $this->parse($args);
+        if ( $this->hasError() ) {
+            throw new \Exception("argument parse failed : ".$this->getErrorSummary());
+        }
+        return $this;
+    }
+    
+    /**
      * @return boolean
      */
     public function hasError() {
@@ -158,7 +171,8 @@ class ArgumentParser {
      * @param unknown $name
      */
     public function get( $name ) {
-        return $this->args[$name]['Value'];
+        $value = $this->args[$name]['Value'];
+        return $value;
     }
     
     /**

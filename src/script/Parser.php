@@ -4,6 +4,18 @@ use app\script\commands\CommandAction;
 use app\script\commands\ICommand;
 class Parser {
     /**
+     * @var Runtime
+     */
+    private $runtime = null;
+    
+    /**
+     * @param Runtime $runtime
+     */
+    public function __construct( Runtime $runtime ) {
+        $this->runtime = $runtime;
+    }
+    
+    /**
      * @param string $commandText
      * @return ICommand
      */
@@ -24,10 +36,27 @@ class Parser {
             $commandClass = CommandAction::class;
         }
         
+        $args = $this->parseArgsToVariable($commandParts);
+        
         /** @var $command ICommand */
         $command = new $commandClass();
-        $command->setCmdArgs($commandParts);
+        $command->setCmdArgs($args);
         return $command;
+    }
+    
+    /**
+     * @param unknown $args
+     * @return unknown
+     */
+    private function parseArgsToVariable( $args ) {
+        $list = array();
+        foreach ( $args as $arg ) {
+            if ( '$' === $arg[0] ) {
+                $arg = $this->runtime->variableGet(substr($arg, 1));
+            }
+            $list[] = $arg;
+        }
+        return $list;
     }
     
     /**

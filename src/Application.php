@@ -30,7 +30,6 @@ class Application {
     private function __construct() {
         spl_autoload_register([$this, '_autoloader']);
         register_shutdown_function([$this, '_shutdown']);
-        pcntl_signal();
     }
     
     /**
@@ -78,8 +77,8 @@ class Application {
             return;
         }
         
-        $parser = new Parser();
         $this->runtime = $runtime = new Runtime();
+        $parser = new Parser($runtime);
         
         $file = $argv[0];
         $commands = file($file);

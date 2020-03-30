@@ -52,14 +52,11 @@ close browser
 | 元素不可见 | assert-elem-invisiable | - elem 元素选择符                      |      |
 | 当前URL    | assert-url             | - url 等待的url                        |      |
 | 元素文本   | assert-elem-text       | - elem 元素选择符<br />- text 文本内容 |      |
+| 弹框出现   | assert-alert-present   |                                        |      |
+| 页面标题   | assert-title           | - title 标题                           |      |
+| 元素存在   | assert-exists          | - elem 元素选择符                      |      |
 
 
-
-**字符串**
-
-- 字符串默认可直接使用, 例如`123456`
-- 如果字符串包含空格， 则需要使用双引号引起来， 例如`"123 123"`
-- 如果字符串包含`"`, 则需要使用反斜线转义， 例如:`"\""`
 
 
 
@@ -78,11 +75,23 @@ set now $DateTime.now
 set rand $Math.random
 
 # 变量操作
-strAppend now "这是追加的内容"
+string.append now "这是追加的内容"
 ```
 
 - 所有变量都为字符串类型进行操作
 - 变量操作的时候使用变量名， 引用值的时候需要加`$`前缀
+
+
+
+
+
+**字符串**
+
+- 字符串默认可直接使用, 例如`123456`
+- 如果字符串包含空格， 则需要使用双引号引起来， 例如`"123 123"`
+- 如果字符串包含`"`, 则需要使用反斜线转义， 例如:`"\""`
+
+
 
 
 
