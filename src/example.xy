@@ -1,3 +1,11 @@
+loop 10 => index
+  if $index = 2
+    log index = $index
+  else
+    log index is not 2
+  endif
+endloop
+
 set browser-name hhhhhh
 if browser-name = chrome
   log browser-name is chrome
