@@ -2,6 +2,7 @@
 namespace app\script;
 use app\script\commands\CommandAction;
 use app\script\commands\ICommand;
+use app\script\commands\CommandBuildinHandler;
 class Parser {
     /**
      * @var Runtime
@@ -22,25 +23,9 @@ class Parser {
     public function parse( $commandText ) {
         $commandParts = $this->split($commandText);
         
-        $charCommandMap = ['#'=>'Comment', '%'=>'Document'];
-        $firstArg = $commandName = array_shift($commandParts);
-        if ( array_key_exists($commandName, $charCommandMap) ) {
-            $commandName = $charCommandMap[$commandName];
-        }
-        $commandName = ucfirst($commandName);
-        
-        $commandNamespace = '\\app\\script\\commands';
-        $commandClass = "{$commandNamespace}\\Command{$commandName}";
-        if ( !class_exists($commandClass) ) {
-            array_unshift($commandParts, $firstArg);
-            $commandClass = CommandAction::class;
-        }
-        
-        $args = $this->parseArgsToVariable($commandParts);
-        
-        /** @var $command ICommand */
-        $command = new $commandClass();
-        $command->setCmdArgs($args);
+        $command = $this->tryGetBuildinCommand($commandParts);
+        $command = (null===$command) ? $this->tryGetBuildinHandlerCommand($commandParts) : $command;
+        $command = (null===$command) ? $this->tryGetOperatorCommand($commandParts) : $command;
         return $command;
     }
     
@@ -52,11 +37,32 @@ class Parser {
         $list = array();
         foreach ( $args as $arg ) {
             if ( '$' === $arg[0] ) {
-                $arg = $this->runtime->variableGet(substr($arg, 1));
+                $arg = $this->getVariableValue(substr($arg, 1));
             }
             $list[] = $arg;
         }
         return $list;
+    }
+    
+    /**
+     * 获取变量值
+     * @param unknown $name
+     */
+    private function getVariableValue( $name ) {
+        $variableParts = explode('.', $name);
+        if ( 2 !== count($variableParts) ) {
+            return $this->runtime->variableGet($name);
+        }
+        
+        $handler = [
+            '\\app\\script\\buildin\\Buildin'.ucfirst($variableParts[0]),
+            'get'.ucfirst($variableParts[1])
+        ];
+        if ( !is_callable($handler) ) {
+            return $this->runtime->variableGet($name);
+        }
+        
+        return call_user_func_array($handler, [$this->runtime]);
     }
     
     /**
@@ -94,5 +100,75 @@ class Parser {
             throw new \Exception("unable to split command text to parts : {$commandText}");
         }
         return $parts;
+    }
+    
+    /**
+     * 解析为内部命令
+     * @param array $commandParts
+     * @return null|ICommand
+     */
+    private function tryGetBuildinCommand( $commandParts ) {
+        $charCommandMap = ['#'=>'Comment', '%'=>'Document'];
+        $firstArg = $commandName = array_shift($commandParts);
+        if ( array_key_exists($commandName, $charCommandMap) ) {
+            $commandName = $charCommandMap[$commandName];
+        }
+        $commandName = ucfirst($commandName);
+        
+        $commandNamespace = '\\app\\script\\commands';
+        $commandClass = "{$commandNamespace}\\Command{$commandName}";
+        if ( !class_exists($commandClass) ) {
+            return null;
+        }
+        
+        $args = $this->parseArgsToVariable($commandParts);
+        
+        /** @var $command ICommand */
+        $command = new $commandClass();
+        $command->setCmdArgs($args);
+        return $command;
+    }
+    
+    /**
+     * 解析为内置函数命令
+     * @param array $commandParts
+     * @return null|ICommand
+     */
+    private function tryGetBuildinHandlerCommand( $commandParts ) {
+        $cmd = $commandParts[0];
+        if ( false === strpos($cmd, '.') ) {
+            return null;
+        }
+        
+        $cmdParts = explode('.', $cmd);
+        if ( 2 != count($cmdParts) ) {
+            return null;
+        }
+        
+        $handleClass = '\\app\\script\\buildin\\Buildin'.ucfirst($cmdParts[0]);
+        if ( !class_exists($handleClass) ) {
+            return null;
+        }
+        
+        $handlerAction = 'handle'.ucfirst($cmdParts[1]);
+        if ( !is_callable([$handleClass, $handlerAction]) ) {
+            return null;
+        }
+        
+        $command = new CommandBuildinHandler();
+        $command->setCmdArgs($this->parseArgsToVariable($commandParts));
+        return $command;
+    }
+    
+    /**
+     * 解析为内部命令
+     * @param array $commandParts
+     * @return null|ICommand
+     */
+    private function tryGetOperatorCommand( $commandParts ) {
+        /** @var $command ICommand */
+        $command = new CommandAction();
+        $command->setCmdArgs($this->parseArgsToVariable($commandParts));
+        return $command;
     }
 }

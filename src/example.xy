@@ -1,12 +1,10 @@
-set browser-name firefox
-use browser $browser-name
-close
-
-
-
+set inquiry-title 荀彧测试询单
+string.append inquiry-title $date.yyyymmdd
+string.append inquiry-title $time.hhiiss
 
 use browser firefox
 open http://127.0.0.1:8001/demo.php
+upload #id script/Runtime.php
 click #btn-click-test
 dblclick #btn-dblclick-test
 input #txt-input-test 输入测试
@@ -14,6 +12,11 @@ upload #file-upload-test D:/Bash/bash.md
 hover #blk-hover-test
 select #slt-select-name-test 选项1
 close
+
+
+
+
+
 
 use browser ie
 open http://127.0.0.1:8001/demo.php
@@ -41,6 +44,8 @@ close 采购方
 close browser:2
 close browser:3
 close browser:4
+
+
 
 
 

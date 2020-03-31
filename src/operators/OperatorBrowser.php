@@ -377,6 +377,7 @@ class OperatorBrowser extends BaseOperator {
      * @param unknown $path
      */
     public function cmdUpload($selector, $path) {
+        $path = \Application::app()->getDocPath($path);
         $elem = $this->driver->findElement($this->parseSelector($selector));
         if ( 'ie' === $this->browserName ) {
             $path = str_replace('/', '\\', $path);

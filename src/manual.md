@@ -75,7 +75,7 @@ set now $DateTime.now
 set rand $Math.random
 
 # 变量操作
-string.append now "这是追加的内容"
+str.append now "这是追加的内容"
 ```
 
 - 所有变量都为字符串类型进行操作
@@ -176,20 +176,27 @@ endeach
   close 销售商
   close
   ```
-```
+ `use` 用于启动对应的Operator， `active`用于在Operator之间进行切换，     `close`用于关闭对应的Operator
   
-  `use` 用于启动对应的Operator， `active`用于在Operator之间进行切换，     `close`用于关闭对应的Operator
 
 
 
 **系统函数**
 
-- StringAppend : `string-append var "append-text"`
-- StringPrepend ：`string-prepend var "测试"`
+| 名称       | 命令          | 参数                                         |
+| ---------- | ------------- | -------------------------------------------- |
+| 字符串追加 | string.append | - var-name 变量名<br />- string 追加的字符串 |
 
 
 
 **系统变量**
+
+| 名称     | 变量          | 示例     |
+| -------- | ------------- | -------- |
+| 当前日期 | Date.yyyymmdd | 20121225 |
+| 当前时间 | Time.hhiiss   | 100012   |
+
+
 
 - Date.now
 
@@ -213,4 +220,3 @@ endeach
 
 - Env.os
 - Env.params
-```

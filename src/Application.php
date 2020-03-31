@@ -14,6 +14,11 @@ class Application {
     private $runtime = null;
     
     /**
+     * @var unknown
+     */
+    private $docroot = null;
+    
+    /**
      * @return self
      */
     public static function app() {
@@ -37,6 +42,14 @@ class Application {
      */
     public function getPath( $path ) {
         return __DIR__.'/'.$path;
+    }
+    
+    /**
+     * @param unknown $path
+     * @return string
+     */
+    public function getDocPath( $path ) {
+        return $this->docroot.DIRECTORY_SEPARATOR.$path;
     }
     
     /**
@@ -81,6 +94,7 @@ class Application {
         $parser = new Parser($runtime);
         
         $file = $argv[0];
+        $this->docroot = dirname(realpath($file));
         $commands = file($file);
         
         foreach ( $commands as $commandText ) {
