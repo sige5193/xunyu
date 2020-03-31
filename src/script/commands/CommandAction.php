@@ -1,11 +1,9 @@
 <?php
 namespace app\script\commands;
-use app\script\Runtime;
-
 /**
  * @author sige
  */
-class CommandAction implements ICommand {
+class CommandAction extends BaseCommand {
     /**
      * name of operators
      * @var string
@@ -28,12 +26,11 @@ class CommandAction implements ICommand {
     }
     
     /**
-     * {@inheritDoc}
-     * @see \app\script\commands\ICommand::exec()
+     * @throws \Exception
      */
-    public function exec(Runtime $runtime) {
+    protected function run() {
         /** @var IOperator $curOperator */
-        $operator = $runtime->getActiveOperator();
+        $operator = $this->getRuntime()->getActiveOperator();
         
         $action = explode('-', $this->name);
         $action = array_map('ucfirst', $action);

@@ -1,6 +1,29 @@
-set inquiry-title 荀彧测试询单
-string.append inquiry-title $date.yyyymmdd
-string.append inquiry-title $time.hhiiss
+set browser-name hhhhhh
+if browser-name = chrome
+  log browser-name is chrome
+  set version 80
+  if version = 100
+    log you are creazy
+  endif
+  if version > 11
+    log you are so old
+  endif
+  log I don't know what kind of browser is
+elseif browser-name = firefox
+  log browser-naem is firefox
+elseif browser-name = ie
+  log browser-name is ie
+else 
+  set version 80
+  if version = 100
+    log you are creazy
+  endif
+  if version > 11
+    log you are so old
+  endif
+  log I don't know what kind of browser is
+endif
+
 
 use browser firefox
 open http://127.0.0.1:8001/demo.php

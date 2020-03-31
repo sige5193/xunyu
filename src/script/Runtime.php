@@ -19,6 +19,33 @@ class Runtime {
     private $variables = array();
     
     /**
+     * @var ICommand|null
+     */
+    private $block = null;
+    
+    /**
+     * @return void
+     */
+    public function blockFinished() {
+        $this->block = null;
+    }
+    
+    /**
+     * @param ICommand $command
+     * @return void
+     */
+    public function execCommand( ICommand $command ) {
+        if ( null !== $this->block ) {
+            $this->block->pushCommand($command);
+        } else if ( $command->isBlockStart() ) {
+            $this->block = $command;
+            $this->block->pushCommand($command);
+        } else {
+            $command->exec($this);
+        }
+    }
+    
+    /**
      * @param unknown $name
      * @param unknown $value
      */
@@ -117,14 +144,6 @@ class Runtime {
      */
     public function getData ( $name, $default=null ) {
         return array_key_exists($name, $this->data) ? $this->data[$name] : $default;
-    }
-    
-    /**
-     * @param ICommand $command
-     * @return void
-     */
-    public function execCommand( ICommand $command ) {
-        $command->exec($this);
     }
     
     /**

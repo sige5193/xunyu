@@ -1,6 +1,5 @@
 <?php
 namespace app\script\commands;
-use app\script\Runtime;
 class CommandBuildinHandler extends BaseCommand {
     /**
      * @var unknown
@@ -23,15 +22,15 @@ class CommandBuildinHandler extends BaseCommand {
     
     /**
      * {@inheritDoc}
-     * @see \app\script\commands\ICommand::exec()
+     * @see \app\script\commands\BaseCommand::run()
      */
-    public function exec(Runtime $runtime) {
+    protected function run() {
         $handler = explode('.', $this->handler);
         $handler[0] = "\\app\\script\\buildin\\Buildin".ucfirst($handler[0]);
         $handler[1] = "handle".ucfirst($handler[1]);
         
         $params = $this->params;
-        array_unshift($params, $runtime);
+        array_unshift($params, $this->getRuntime());
         call_user_func_array($handler, $params);
     }
 }

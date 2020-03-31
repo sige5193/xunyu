@@ -5,9 +5,30 @@ namespace app\script\commands;
  */
 abstract class BaseCommand implements ICommand {
     /**
+     * @var string
+     */
+    private $rawCommand = null;
+    
+    /**
      * @var array
      */
     private $args = [];
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\script\commands\ICommand::setRawCommand()
+     */
+    public function setRawCommand( $rawCommand ) {
+        $this->rawCommand = $rawCommand;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\script\commands\ICommand::getRawCommand()
+     */
+    public function getRawCommand() {
+        return $this->rawCommand;
+    }
     
     /**
      * {@inheritDoc}
@@ -37,5 +58,54 @@ abstract class BaseCommand implements ICommand {
      */
     protected function getArgsParser() {
         return null;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\script\commands\ICommand::isBlockStart()
+     */
+    public function isBlockStart() {
+        return false;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\script\commands\ICommand::isBlockEnd()
+     */
+    public function isBlockEnd(\app\script\commands\ICommand $command) {
+        return false;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\script\commands\ICommand::pushCommand()
+     */
+    public function pushCommand(\app\script\commands\ICommand $command) {
+        return false;
+    }
+    
+    /**
+     * get current runtime
+     * @return \app\script\Runtime
+     */
+    protected function getRuntime() {
+        return \Application::app()->getRuntime();
+    }
+    
+    /**
+     *
+     */
+    public function exec() {
+        if ( !$this->isBlockStart() ) {
+            echo "> {$this->getRawCommand()}\n";
+        }
+        $this->run();
+    }
+    
+    /**
+     * 
+     */
+    protected function run() {
+        
     }
 }

@@ -16,6 +16,11 @@ class Application {
     /**
      * @var unknown
      */
+    private $parser = null;
+    
+    /**
+     * @var unknown
+     */
     private $docroot = null;
     
     /**
@@ -50,6 +55,20 @@ class Application {
      */
     public function getDocPath( $path ) {
         return $this->docroot.DIRECTORY_SEPARATOR.$path;
+    }
+    
+    /**
+     * @return \app\script\Runtime
+     */
+    public function getRuntime() {
+        return $this->runtime;
+    }
+    
+    /**
+     * @return \app\script\Parser 
+     */
+    public function getParser() {
+        return $this->parser;
     }
     
     /**
@@ -91,18 +110,17 @@ class Application {
         }
         
         $this->runtime = $runtime = new Runtime();
-        $parser = new Parser($runtime);
+        $this->parser = $parser = new Parser($runtime);
         
         $file = $argv[0];
         $this->docroot = dirname(realpath($file));
         $commands = file($file);
         
-        foreach ( $commands as $commandText ) {
-            $commandText = trim($commandText);
+        foreach ( $commands as $commandTextRaw ) {
+            $commandText = trim($commandTextRaw);
             if ( empty($commandText) ) {
                 continue;
             }
-            echo "> {$commandText}\n";
             try {
                 $command = $parser->parse($commandText);
                 $runtime->execCommand($command);

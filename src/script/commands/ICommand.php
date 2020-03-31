@@ -1,6 +1,5 @@
 <?php
 namespace app\script\commands;
-use app\script\Runtime;
 interface ICommand {
     /**
      * set command args to command
@@ -13,6 +12,31 @@ interface ICommand {
      * execute command with runtime
      * @return void
      */
-    function exec( Runtime $runtime );
+    function exec( );
+    
+    /**
+     * @param string $rawCommand
+     */
+    function setRawCommand( $rawCommand );
+    
+    /**
+     * @return string
+     */
+    function getRawCommand();
+    
+    /**
+     * 
+     */
+    function isBlockStart();
+    
+    /**
+     * 
+     */
+    function isBlockEnd(ICommand $command);
+    
+    /**
+     * @param ICommand $command
+     */
+    function pushCommand(ICommand $command);
 }
 

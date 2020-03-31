@@ -26,6 +26,7 @@ class Parser {
         $command = $this->tryGetBuildinCommand($commandParts);
         $command = (null===$command) ? $this->tryGetBuildinHandlerCommand($commandParts) : $command;
         $command = (null===$command) ? $this->tryGetOperatorCommand($commandParts) : $command;
+        $command->setRawCommand($commandText);
         return $command;
     }
     

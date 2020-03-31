@@ -1,8 +1,6 @@
 <?php
 namespace app\script\commands;
-use app\script\Runtime;
 use app\script\ArgumentParser;
-
 /**
  *
  */
@@ -29,9 +27,9 @@ class CommandSet extends BaseCommand {
     
     /**
      * {@inheritDoc}
-     * @see \app\script\commands\ICommand::exec()
+     * @see \app\script\commands\BaseCommand::run()
      */
-    public function exec(Runtime $runtime) {
-        $runtime->variableSet($this->name, $this->value);
+    protected function run() {
+        $this->getRuntime()->variableSet($this->name, $this->value);
     }
 }

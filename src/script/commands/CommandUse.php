@@ -1,6 +1,5 @@
 <?php
 namespace app\script\commands;
-use app\script\Runtime;
 use app\operators\IOperator;
 /**
  * @author sige
@@ -45,9 +44,9 @@ class CommandUse extends BaseCommand {
     
     /**
      * {@inheritDoc}
-     * @see \app\script\commands\ICommand::exec()
+     * @see \app\script\commands\BaseCommand::run()
      */
-    public function exec(Runtime $runtime) {
+    protected function run() {
         $operatorName = ucfirst($this->operatorName);
         $operatorClass = "\\app\\operators\\Operator{$operatorName}";
         if ( !class_exists($operatorClass) ) {
@@ -70,6 +69,6 @@ class CommandUse extends BaseCommand {
             $this->alias = "{$this->operatorName}:{$counter}";
         }
         
-        $runtime->loadOperator($this->alias, $operator);
+        $this->getRuntime()->loadOperator($this->alias, $operator);
     }
 }

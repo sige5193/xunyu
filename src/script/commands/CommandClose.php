@@ -16,9 +16,10 @@ class CommandClose extends BaseCommand {
 
     /**
      * {@inheritDoc}
-     * @see \app\script\commands\ICommand::exec()
+     * @see \app\script\commands\BaseCommand::run()
      */
-    public function exec(\app\script\Runtime $runtime) {
+    protected function run() {
+        $runtime = $this->getRuntime();
         if ( null === $this->operatorName ) {
             $this->operatorName = $runtime->getActiveOperatorName();
         }
