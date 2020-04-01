@@ -102,14 +102,8 @@ class Runtime {
         
         if ( array_key_exists($name, $curScope) ) {
             $value = $curScope[$name];
-            if ( Variable::TYPE_FUNC_RETURN_VAR == $value->getType() ) {
-                unset($curScope[$name]);
-            }
         } else if ( array_key_exists($name, $globalScope) ) {
             $value = $globalScope[$name];
-            if ( Variable::TYPE_FUNC_RETURN_VAR == $value->getType() ) {
-                unset($globalScope[$name]);
-            }
         } else {
             return '';
         }

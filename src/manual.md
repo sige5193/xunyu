@@ -109,11 +109,11 @@ set myFuncReturns $函数名.return-value
 
 # 系统函数调用
 call DateStringToTime "2020-01-01 00:00:00"
-set time $DateStringToTime.returnValue
+set time $return-value
 ```
 
 - return是可选的， 如果没有返回值， 则返回空字符串，如果没有return语句则返回空字符串
-- 返回值的使用方式为`$函数名.returnValue`
+- 返回值的使用方式为`$return-value`
 - 自定义函数不得与系统函数重名， 否则会出错
 - 函数和指令的区分：首先匹配指令， 然后匹配函数， 这样可以省略`call`关键字
 
