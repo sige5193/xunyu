@@ -16,12 +16,39 @@ class Runtime {
     /**
      * @var array
      */
-    private $variables = array();
+    private $variableStack = [];
     
     /**
      * @var ICommand|null
      */
     private $block = null;
+    
+    /**
+     * @var array
+     */
+    private $funcs = array();
+    
+    /**
+     * @param UserFunction $func
+     */
+    public function funcRegister( UserFunction $func ) {
+        $this->funcs[$func->name] = $func;
+    }
+    
+    /**
+     * @param unknown $name
+     * @return \app\script\UserFunction 
+     */
+    public function funcGet( $name ) {
+        return $this->funcs[$name];
+    }
+    
+    /**
+     * 
+     */
+    public function __construct() {
+        $this->variableScopeEnterNew();
+    }
     
     /**
      * @return void
@@ -50,18 +77,57 @@ class Runtime {
      * @param unknown $value
      */
     public function variableSet( $name, $value ) {
-        $this->variables[$name] = $value;
+        $curScope = &$this->variableStack[count($this->variableStack)-1];
+        $globalScope = &$this->variableStack[0];
+        
+        if ( !($value instanceof Variable ) ) {
+            $value = new Variable($value);
+        }
+        
+        if ( array_key_exists($name, $curScope) ) {
+            $curScope[$name] = $value;
+        } else if ( array_key_exists($name, $globalScope) ) {
+            $globalScope[$name] = $value;
+        } else {
+            $curScope[$name] = $value;
+        }
     }
     
     /**
      * @param unknown $name
      */
     public function variableGet( $name ) {
-        if ( array_key_exists($name, $this->variables) ) {
-            return $this->variables[$name];
+        $curScope = &$this->variableStack[count($this->variableStack)-1];
+        $globalScope = &$this->variableStack[0];
+        
+        if ( array_key_exists($name, $curScope) ) {
+            $value = $curScope[$name];
+            if ( Variable::TYPE_FUNC_RETURN_VAR == $value->getType() ) {
+                unset($curScope[$name]);
+            }
+        } else if ( array_key_exists($name, $globalScope) ) {
+            $value = $globalScope[$name];
+            if ( Variable::TYPE_FUNC_RETURN_VAR == $value->getType() ) {
+                unset($globalScope[$name]);
+            }
         } else {
             return '';
         }
+        return $value->getValue();
+    }
+    
+    /**
+     * 
+     */
+    public function variableScopeEnterNew() {
+        $this->variableStack[] = array();
+    }
+    
+    /**
+     * 
+     */
+    public function variableScopeLeave() {
+        array_pop($this->variableStack);
     }
     
     /**

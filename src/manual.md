@@ -105,7 +105,7 @@ endfunc
 
 # 获取函数返回值
 call 函数名 参数名1 参数名2
-set myFuncReturns $函数名.returnValue
+set myFuncReturns $函数名.return-value
 
 # 系统函数调用
 call DateStringToTime "2020-01-01 00:00:00"
@@ -152,6 +152,7 @@ endwhile
 ```
 
 ```
+# 暂时没有支持
 each 列表 => 项目变量名 : 索引变量名
   # BODY
 endeach
