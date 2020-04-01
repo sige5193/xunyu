@@ -6,7 +6,7 @@ class BuildinTime {
      * @param Runtime $runtime
      * @return string
      */
-    public static function getHhiiss( Runtime $runtime ) {
+    public static function getHhiiss( ) {
         return date('His');
     }
 }

@@ -151,7 +151,8 @@ class Parser {
             return null;
         }
         
-        $handlerAction = 'handle'.ucfirst($cmdParts[1]);
+        $handlerAction = implode('', array_map('ucfirst', explode('-', $cmdParts[1])));
+        $handlerAction = 'handle'.$handlerAction;
         if ( !is_callable([$handleClass, $handlerAction]) ) {
             return null;
         }

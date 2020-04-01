@@ -100,14 +100,28 @@ class Runtime {
         $curScope = &$this->variableStack[count($this->variableStack)-1];
         $globalScope = &$this->variableStack[0];
         
-        if ( array_key_exists($name, $curScope) ) {
-            $value = $curScope[$name];
-        } else if ( array_key_exists($name, $globalScope) ) {
-            $value = $globalScope[$name];
+        $keys = explode('.', $name);
+        
+        $key = array_shift($keys);
+        if ( array_key_exists($key, $curScope) ) {
+            $value = $curScope[$key];
+        } else if ( array_key_exists($key, $globalScope) ) {
+            $value = $globalScope[$key];
         } else {
             return '';
         }
-        return $value->getValue();
+        
+        $value = $value->getValue();
+        while ( !empty($keys) ) {
+            $key = array_shift($keys);
+            if ( array_key_exists($key, $value) ) {
+                $value = $value[$key];
+            } else {
+                return '';
+            }
+        }
+        
+        return $value;
     }
     
     /**

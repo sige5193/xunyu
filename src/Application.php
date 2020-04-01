@@ -116,8 +116,8 @@ class Application {
         $this->docroot = dirname(realpath($file));
         $commands = file($file);
         
-        foreach ( $commands as $commandTextRaw ) {
-            $commandText = trim($commandTextRaw);
+        foreach ( $commands as $commandText ) {
+            $commandText = trim($commandText);
             if ( empty($commandText) ) {
                 continue;
             }

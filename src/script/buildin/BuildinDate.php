@@ -6,7 +6,7 @@ class BuildinDate {
      * @param Runtime $runtime
      * @return string
      */
-    public static function getYyyymmdd( Runtime $runtime ) {
+    public static function getYyyymmdd( ) {
         return date('Ymd');
     }
 }

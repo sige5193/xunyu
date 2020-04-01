@@ -31,4 +31,28 @@ abstract class BaseOperator implements IOperator {
     protected function getArgsParser() {
         return null;
     }
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\operators\IOperator::init()
+     */
+    public function init() {}
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\operators\IOperator::start()
+     */
+    public function start() {}
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\operators\IOperator::stop()
+     */
+    public function stop() {}
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\operators\IOperator::destory()
+     */
+    public function destory() {}
 }
