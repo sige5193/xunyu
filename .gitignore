@@ -1,6 +1,7 @@
 # build folder
 build/
-resource/
+resource/windows/php
+resource/windows/webdriver
 
 /vscode-ext/node_modules/
 /vendor/

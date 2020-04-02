@@ -5,3 +5,4 @@ build-windows :
 	rm -f build/windows/composer.lock
 	cp resource/windows/php build/windows/ -r
 	cp resource/windows/webdriver build/windows/ -r
+	cp resource/windows/xunyu.bat build/windows/xunyu.bat
