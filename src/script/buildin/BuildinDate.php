@@ -1,12 +1,17 @@
 <?php
 namespace app\script\buildin;
-use app\script\Runtime;
 class BuildinDate {
     /**
-     * @param Runtime $runtime
      * @return string
      */
-    public static function getYyyymmdd( ) {
+    public static function getYyyymmdd() {
         return date('Ymd');
+    }
+    
+    /**
+     * @return number
+     */
+    public static function getTimestamp() {
+        return time();
     }
 }

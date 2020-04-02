@@ -96,7 +96,9 @@ class Application {
      * 
      */
     public function _shutdown() {
-        $this->runtime->shutdown();
+        if ( null !== $this->runtime ) {
+            $this->runtime->shutdown();
+        }
     }
     
     /**
@@ -106,6 +108,7 @@ class Application {
         global $argv;
         array_shift($argv);
         if ( empty($argv) ) {
+            echo "no tese case found.\n";
             return;
         }
         

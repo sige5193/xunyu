@@ -2,6 +2,9 @@
 build/
 resource/windows/php
 resource/windows/webdriver
+src/php
+src/webdriver
+
 
 /vscode-ext/node_modules/
 /vendor/

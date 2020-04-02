@@ -11,7 +11,7 @@ use app\script\ArgumentParser;
 use Facebook\WebDriver\Remote\LocalFileDetector;
 use app\script\Assertion;
 /**
- * @todo 进程意外退出时，浏览器服务没有关闭
+ *
  */
 class OperatorBrowser extends BaseOperator {
     /**
@@ -81,7 +81,8 @@ class OperatorBrowser extends BaseOperator {
         if ( !method_exists($this, $handler) ) {
             throw new \Exception("browser `{$this->browserName}` has not been supported");
         }
-        return $this->$handler();
+        $this->$handler();
+        $this->driver->manage()->window()->maximize();
     }
     
     /**
@@ -98,7 +99,7 @@ class OperatorBrowser extends BaseOperator {
             throw new \Exception("platform `{$plarform}` has not been supported for browser.");
         }
         
-        $driverPath = \Application::app()->getPath("platforms/{$plarform}/iedriver{$driverExt}");
+        $driverPath = \Application::app()->getPath("webdriver/iedriver{$driverExt}");
         if ( !file_exists($driverPath) ) {
             throw new \Exception("not supported browser type `{$this->browserName}-v{$this->version}`");
         }
@@ -188,7 +189,7 @@ class OperatorBrowser extends BaseOperator {
             throw new \Exception("unable to match webdriver version for chrome v{$chromeVersion}");
         }
         
-        $driverPath = \Application::app()->getPath("platforms/{$plarform}/chromedriver-{$driverVersion}{$driverExt}");
+        $driverPath = \Application::app()->getPath("webdriver/chromedriver-{$driverVersion}{$driverExt}");
         if ( !file_exists($driverPath) ) {
             throw new \Exception("not supported browser type `{$this->browserName}-v{$this->version}`");
         }
@@ -238,7 +239,7 @@ class OperatorBrowser extends BaseOperator {
             throw new \Exception("platform `{$plarform}` has not been supported for browser.");
         }
         
-        $driverPath = \Application::app()->getPath("platforms/{$plarform}/firefoxdriver{$driverExt}");
+        $driverPath = \Application::app()->getPath("webdriver/firefoxdriver{$driverExt}");
         if ( !file_exists($driverPath) ) {
             throw new \Exception("unable to find firefox webdriver");
         }
@@ -432,6 +433,14 @@ class OperatorBrowser extends BaseOperator {
     }
     
     /**
+     * @param unknown $path
+     */
+    public function cmdTakeScreenshot($path) {
+        $path = \Application::app()->getDocPath($path);
+        $this->driver->takeScreenshot($path);
+    }
+    
+    /**
      * @param unknown $title
      */
     public function cmdWaitTitle( $title, $timeout=null ) {
@@ -464,6 +473,16 @@ class OperatorBrowser extends BaseOperator {
         $by = $this->parseSelector($selector);
         $wait = new WebDriverWait($this->driver, $timeout);
         $wait->until(WebDriverExpectedCondition::presenceOfElementLocated($by));
+    }
+    
+    /**
+     * @param unknown $selector
+     * @param unknown $timeout
+     */
+    public function cmdWaitElemNotExists( $selector, $timeout=null ) {
+        $by = $this->parseSelector($selector);
+        $wait = new WebDriverWait($this->driver, $timeout);
+        $wait->until(WebDriverExpectedCondition::not(WebDriverExpectedCondition::presenceOfElementLocated($by)));
     }
     
     /**
