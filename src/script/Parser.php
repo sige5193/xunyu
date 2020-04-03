@@ -31,18 +31,34 @@ class Parser {
     }
     
     /**
-     * @param unknown $args
-     * @return unknown
+     * @param string[] $args
+     * @return string[]
      */
     private function parseArgsToVariable( $args ) {
         $list = array();
         foreach ( $args as $arg ) {
             if ( '$' === $arg[0] ) {
                 $arg = $this->getVariableValue(substr($arg, 1));
+            } else {
+                $arg = $this->replaceVaribleInsideTheString($arg);
             }
             $list[] = $arg;
         }
         return $list;
+    }
+    
+    /**
+     * @link https://github.com/sige-chen/xunyu/issues/1
+     * @param string $arg
+     * @return string
+     */
+    private function replaceVaribleInsideTheString( $arg ) {
+        preg_match_all('#(?P<placeholder>\{\$(?P<name>[a-zA-Z0-9\-\.]+)\})#is', $arg, $matches);
+        foreach ( $matches['name'] as $index => $varname ) {
+            $value = $this->getVariableValue($varname);
+            $arg = str_replace($matches['placeholder'][$index], $value, $arg);
+        }
+        return $arg;
     }
     
     /**
