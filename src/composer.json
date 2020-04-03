@@ -8,6 +8,7 @@
 		}
 	],
 	"require" : {
-		"php-webdriver/webdriver" : "^1.8"
+		"php-webdriver/webdriver" : "^1.8",
+		"nategood/commando": "^0.4.0"
 	}
 }
