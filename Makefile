@@ -3,6 +3,7 @@ build-windows :
 	cp src/* build/windows/ -r
 	rm -f build/windows/composer.json
 	rm -f build/windows/composer.lock
-	cp resource/windows/php build/windows/ -r
-	cp resource/windows/webdriver build/windows/ -r
-	cp resource/windows/xunyu.bat build/windows/xunyu.bat
+	powershell "Compress-Archive build/windows build/windows/build.zip"
+
+clean :
+	rm -fr build/windows
