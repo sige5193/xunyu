@@ -1,8 +1,7 @@
 # 语法手册
 
 - [Variable](./variable.md)
-
-
+- [Include](./keywords.md#include)
 
 **浏览器测试**
 
