@@ -6,6 +6,6 @@ document.getElementById("btn-start").onclick = function() {
   }
 
   localStorage.setItem("IsRecording", "YES");
-  localStorage.setItem("CachedCommand", `OPEN ${url}`);
+  localStorage.setItem("CachedCommand", `open ${url}`);
   window.location.href = url;
 };

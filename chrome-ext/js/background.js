@@ -17,6 +17,7 @@ commandReceiver.onmessage = function(e) {console.log(e.data);}
  */
 commandReceiver.onopen = function() { 
    chrome.browserAction.setBadgeText({text:'rec..'});
+   XYSendCommandsToReceiver('use browser chrome');
 }
 
 /**
@@ -94,6 +95,7 @@ function XYMessageHandlerNewCommand( request, sendResponse ) {
  */
 function XYDoneRecording() {
    XYFlushCommandToReceiver();
+   commandReceiver.send(JSON.stringify({action:'NEW-COMMANDS',commands:['close']}));
    commandReceiver.send(JSON.stringify({action:'STOP-RECORDING'}));
    setTimeout(function() {
       commandReceiver.close();
