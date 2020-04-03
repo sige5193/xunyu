@@ -3,8 +3,6 @@
 environment file use to set up different configuration values for different environment,  you can change env name by `--env`  param. as default, xunyu would try to find the env file named `env.ini`
 
 ```bash
-$ xunyu example.xy --env=test
-#or
 $ xunyu example.xy --env=test.ini
 ```
 

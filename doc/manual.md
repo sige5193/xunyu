@@ -81,7 +81,7 @@ str.append now "这是追加的内容"
 - 所有变量都为字符串类型进行操作
 - 变量操作的时候使用变量名， 引用值的时候需要加`$`前缀
 
-
+- [environment](./environment.md)
 
 
 
