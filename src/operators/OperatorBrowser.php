@@ -441,6 +441,37 @@ class OperatorBrowser extends BaseOperator {
     }
     
     /**
+     * @param unknown $selector
+     */
+    public function cmdSwitchToFrame($selector) {
+        $frame = $this->driver->findElement($this->parseSelector($selector));
+        $this->driver->switchTo()->frame($frame);
+    }
+    
+    /**
+     * 
+     */
+    public function cmdSwitchToParent() {
+        $this->driver->switchTo()->parent();
+    }
+    
+    /**
+     * 
+     */
+    public function cmdCloseCurrentTab() {
+        $this->driver->close();
+        $handlers = $this->driver->getWindowHandles();
+        $this->driver->switchTo()->window($handlers[0]);
+    }
+    
+    /**
+     * @param unknown $selector
+     */
+    public function cmdBlur( $selector ) {
+        $this->driver->findElement($this->parseSelector($selector))->sendKeys("\t");
+    }
+    
+    /**
      * @param unknown $title
      */
     public function cmdWaitTitle( $title, $timeout=null ) {
