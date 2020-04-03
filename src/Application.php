@@ -1,7 +1,7 @@
 <?php 
 use app\script\Parser;
 use app\script\Runtime;
-
+use Commando\Command;
 class Application {
     /**
      * @var self
@@ -105,20 +105,24 @@ class Application {
      * @return void
      */
     public function start() {
-        global $argv;
-        array_shift($argv);
-        if ( empty($argv) ) {
-            echo "no tese case found.\n";
-            return;
-        }
-        
         $this->runtime = $runtime = new Runtime();
         $this->parser = $parser = new Parser($runtime);
         
-        $file = $argv[0];
-        $this->docroot = dirname(realpath($file));
-        $commands = file($file);
+        $params = $this->cliParseParams();
         
+        # set up test case
+        $file = $params['path'];
+        $this->docroot = dirname(realpath($file));
+        
+        # set up env vars
+        $envpath = $this->getDocPath($params['env']);
+        if ( file_exists($envpath) ) {
+            $env = parse_ini_file($envpath, true);
+            $runtime->variableSet('env', $env);
+        }
+        
+        
+        $commands = file($file);
         foreach ( $commands as $commandText ) {
             $commandText = trim($commandText);
             if ( empty($commandText) ) {
@@ -132,5 +136,19 @@ class Application {
                 exit();
             }
         }
+    }
+    
+    /**
+     * @return \Commando\Command
+     */
+    private function cliParseParams() {
+        $cmd = new Command();
+        $cmd->option()->require()->describedAs('path to test case(s)');
+        $cmd->option('e')->aka('env')->default('env.ini')->describedAs('path or name of env file, default to env.ini');
+        
+        $params = array();
+        $params['path'] = $cmd[0];
+        $params['env'] = $cmd['env'];
+        return $params;
     }
 }
