@@ -27,27 +27,16 @@ class CommandInclude extends BaseCommand {
      * @see \app\script\commands\BaseCommand::run()
      */
     protected function run() {
-        $runtime = \Application::app()->getRuntime();
-        $parser = \Application::app()->getParser();
-        
-        $this->exportParams($runtime);
-        $file = \Application::app()->getDocPath($this->file);
-        $commands = file($file);
-        
-        foreach ( $commands as $commandTextRaw ) {
-            $commandText = trim($commandTextRaw);
-            if ( empty($commandText) ) {
-                continue;
-            }
-            $command = $parser->parse($commandText);
-            $runtime->execCommand($command);
-        }
+        $this->exportParams();
+        \Application::app()->runCommandsByFile($this->file);
     }
     
     /**
-     * @param Runtime $runtime
+     * 
      */
-    private function exportParams( Runtime $runtime ) {
+    private function exportParams( ) {
+        $runtime = \Application::app()->getRuntime();
+        
         $params = explode(';', $this->params);
         $params = array_filter($params);
         
