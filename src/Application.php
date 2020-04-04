@@ -120,25 +120,30 @@ class Application {
             $runtime->variableSet('env', $env);
         }
         
-        # set up test case
-        $file = $params['path'];
-        $commands = file($file);
-        foreach ( $commands as $commandText ) {
-            $commandText = trim($commandText);
-            if ( empty($commandText) ) {
-                continue;
+        $this->runTests($params['path']);
+    }
+    
+    /**
+     * 
+     */
+    private function runTests( $path ) {
+        $path = rtrim($path, '/\\');
+        if ( is_file($path) ) {
+            echo "[==> {$path}]\n";
+            return $this->runCommandsByFile($path);
+        } else if ( is_dir($path) ) {
+            $files = scandir($path);
+            foreach ( $files as $file ) {
+                $newPath = $path.DIRECTORY_SEPARATOR.$file;
+                if ( '.' === $file[0] 
+                || (is_file($newPath) && '.xy' !== pathinfo($file, PATHINFO_EXTENSION) ) 
+                ) {
+                    continue;
+                }
+                $this->runTests($newPath);
             }
-            try {
-                $command = $parser->parse($commandText);
-                $runtime->execCommand($command);
-            } catch ( RuntimeErrorException $e ) {
-                echo "\n\nError\n";
-                echo "{$e->getMessage()}\n";
-                exit();
-            } catch ( Exception $e ) {
-                echo "\n\nERROR : {$e->getMessage()}\n";
-                exit();
-            }
+        } else {
+            throw new Exception("test path is not available : {$path}");
         }
     }
     
@@ -167,19 +172,28 @@ class Application {
      * @param string $file
      */
     public function runCommandsByFile( $file ) {
-        $file = $this->getDocPath($file);
+        $file = is_file($file) ? $file : $this->getDocPath($file);
         if ( !file_exists($file) ) {
             throw new RuntimeErrorException("unable to load script file : {$file}");
         }
         
         $commands = file($file);
-        foreach ( $commands as $commandTextRaw ) {
-            $commandText = trim($commandTextRaw);
+        foreach ( $commands as $commandText ) {
+            $commandText = trim($commandText);
             if ( empty($commandText) ) {
                 continue;
             }
-            $command = $this->parser->parse($commandText);
-            $this->runtime->execCommand($command);
+            try {
+                $command = $this->parser->parse($commandText);
+                $this->runtime->execCommand($command);
+            } catch ( RuntimeErrorException $e ) {
+                echo "\n\nError\n";
+                echo "{$e->getMessage()}\n";
+                exit();
+            } catch ( Exception $e ) {
+                echo "\n\nERROR : {$e->getMessage()}\n";
+                exit();
+            }
         }
     }
 }

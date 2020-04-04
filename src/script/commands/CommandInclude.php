@@ -40,7 +40,11 @@ class CommandInclude extends BaseCommand {
         $params = explode(';', $this->params);
         $params = array_filter($params);
         
-        $argv = [];
+        $argv = $runtime->variableGet('argv');
+        if ( empty($argv) ) {
+            $argv = [];
+        }
+        
         foreach ( $params as $item ) {
             list($name, $value) = explode('=', $item);
             $argv[$name] = $value;
