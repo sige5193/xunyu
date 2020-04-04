@@ -152,11 +152,16 @@ class Application {
      */
     private function cliParseParams() {
         $cmd = new Command();
-        $cmd->option()->require()->describedAs('path to test case(s)');
+        $cmd->option()->describedAs('path to test case(s)');
         $cmd->option('e')->aka('env')->default('env.ini')->describedAs('path or name of env file, default to env.ini');
         $cmd->option('d')->aka('doc-root')->describedAs('path of document root');
         
         $params = array();
+        $conffile = getcwd().'/xunyu.json';
+        if ( file_exists($conffile) ) {
+            $params = json_decode(file_get_contents($conffile), true);
+        }
+        
         $params['path'] = $cmd[0];
         $params['env'] = $cmd['env'];
         $params['doc-root'] = $cmd['doc-root'];
