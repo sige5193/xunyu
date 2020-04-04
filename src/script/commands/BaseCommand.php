@@ -15,6 +15,22 @@ abstract class BaseCommand implements ICommand {
     private $args = [];
     
     /**
+     * @var array
+     */
+    private $defination = array(
+        'file' => null,
+        'line' => null,
+    );
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\script\commands\ICommand::setDefination()
+     */
+    public function setDefination($name, $value) {
+        $this->defination[$name] = $value;
+    }
+    
+    /**
      * {@inheritDoc}
      * @see \app\script\commands\ICommand::setRawCommand()
      */
@@ -99,7 +115,16 @@ abstract class BaseCommand implements ICommand {
         if ( !$this->isBlockStart() ) {
             echo "> {$this->getRawCommand()}\n";
         }
-        $this->run();
+        try {
+            $this->run();
+        } catch ( \Exception $e ) {
+            echo "\n\n";
+            echo "Command Error : \n";
+            echo "{$e->getMessage()} \n";
+            echo "File : {$this->defination['file']}\n";
+            echo "Line : #{$this->defination['line']}\n";
+            exit();
+        }
     }
     
     /**

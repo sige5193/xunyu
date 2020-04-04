@@ -38,5 +38,14 @@ interface ICommand {
      * @param ICommand $command
      */
     function pushCommand(ICommand $command);
+    
+    /**
+     * setup command definations
+     * @param string $name
+     * <li> - file : the file path of command. </li>
+     * <li> - line : this line no of command in file. </li>
+     * @param mixed $value
+     */
+    function setDefination($name, $value);
 }
 

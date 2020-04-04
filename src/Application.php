@@ -15,7 +15,7 @@ class Application {
     private $runtime = null;
     
     /**
-     * @var unknown
+     * @var Parser
      */
     private $parser = null;
     
@@ -178,18 +178,16 @@ class Application {
         }
         
         $commands = file($file);
-        foreach ( $commands as $commandText ) {
+        foreach ( $commands as $index => $commandText ) {
             $commandText = trim($commandText);
             if ( empty($commandText) ) {
                 continue;
             }
             try {
                 $command = $this->parser->parse($commandText);
+                $command->setDefination('file', $file);
+                $command->setDefination('line', $index+1);
                 $this->runtime->execCommand($command);
-            } catch ( RuntimeErrorException $e ) {
-                echo "\n\nError\n";
-                echo "{$e->getMessage()}\n";
-                exit();
             } catch ( Exception $e ) {
                 echo "\n\nERROR : {$e->getMessage()}\n";
                 exit();
