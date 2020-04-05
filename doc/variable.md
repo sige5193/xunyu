@@ -67,7 +67,6 @@ there are some system variables defined inside the xunyu. and here is the list
 | ------------ | ------------- | -------- |
 | Current date | Data.yyyymmdd | 20200101 |
 | Current time | Time.hhiiss   | 125959   |
-|              |               |          |
 
 
 
