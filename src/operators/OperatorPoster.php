@@ -63,7 +63,7 @@ class OperatorPoster extends BaseOperator {
         }
         
         $value = $this->body[$key];
-        \Application::app()->getRuntime()->variableSet($varName, $value);
+        \Application::app()->getTaseCase()->getRuntime()->variableSet($varName, $value);
     }
     
     /**

@@ -44,7 +44,7 @@ class CommandLoop extends BaseCommand {
         } else if ( 1==count($this->blockChain)
         && $command instanceof CommandEndloop ) {
             # 当前块结束
-            \Application::app()->getRuntime()->blockFinished();
+            $this->getRuntime()->blockFinished();
             $this->exec();
         } else {
             # 普通命令
@@ -76,20 +76,14 @@ class CommandLoop extends BaseCommand {
      * @see \app\script\commands\BaseCommand::run()
      */
     protected function run() {
-        $runtime = \Application::app()->getRuntime();
-        $parser = \Application::app()->getParser();
-        
+        $runtime = $this->getRuntime();
         for ( $i=0; $i<$this->count; $i++ ) {
             if ( null !== $this->index ) {
                 $runtime->variableSet($this->index, $i);
             }
             
-            foreach ( $this->commands as $command ) {
-                $rawCommand = $command->getRawCommand();
-                $command = $parser->parse($rawCommand);
-                $command->setRawCommand($rawCommand);
-                $runtime->execCommand($command);
-            }
+            $file = $this->getDefination('file');
+            $this->getTestCase()->executeCommands($this->commands, $file);
         }
     }
 }

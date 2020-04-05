@@ -19,6 +19,6 @@ class CommandLog extends BaseCommand {
      * @see \app\script\commands\BaseCommand::run()
      */
     protected function run() {
-        echo implode(' ', $this->params), "\n";
+        \Application::app()->log(implode('', $this->params));
     }
 }

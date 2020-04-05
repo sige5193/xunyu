@@ -28,14 +28,14 @@ class CommandInclude extends BaseCommand {
      */
     protected function run() {
         $this->exportParams();
-        \Application::app()->runCommandsByFile($this->file);
+        $this->getTestCase()->executeFile($this->file);
     }
     
     /**
      * 
      */
     private function exportParams( ) {
-        $runtime = \Application::app()->getRuntime();
+        $runtime = $this->getRuntime();
         
         $params = explode(';', $this->params);
         $params = array_filter($params);

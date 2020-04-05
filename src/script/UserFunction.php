@@ -17,23 +17,29 @@ class UserFunction {
     public $commands = [];
     
     /**
+     * @var unknown
+     */
+    public $file = null;
+    
+    /**
+     * @var unknown
+     */
+    public $line = null;
+    
+    /**
      * @param unknown $params
      */
     public function exec( $params ) {
-        $runtime = \Application::app()->getRuntime();
-        $parser = \Application::app()->getParser();
+        $testcase = \Application::app()->getTaseCase();
+        $runtime = $testcase->getRuntime();
+        $parser = $testcase->getParser();
         
         $runtime->variableScopeEnterNew();
         foreach ( $this->paramNames as $paramName ) {
             $runtime->variableSet($paramName, array_shift($params));
         }
         
-        foreach ( $this->commands as $command ) {
-            $rawCommand = $command->getRawCommand();
-            $command = $parser->parse($rawCommand);
-            $command->setRawCommand($rawCommand);
-            $runtime->execCommand($command);
-        }
+        $testcase->executeCommands($this->commands, $this->file, $this->line);
         
         $returnVal = $runtime->variableGet('return-val');
         $runtime->variableScopeLeave();

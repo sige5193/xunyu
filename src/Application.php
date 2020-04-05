@@ -1,8 +1,7 @@
 <?php 
-use app\script\Parser;
-use app\script\Runtime;
 use Commando\Command;
-use app\script\RuntimeErrorException;
+use app\script\TestCase;
+use app\script\Logger;
 class Application {
     /**
      * @var self
@@ -10,19 +9,19 @@ class Application {
     private static $app = null;
     
     /**
-     * @var Runtime
-     */
-    private $runtime = null;
-    
-    /**
-     * @var Parser
-     */
-    private $parser = null;
-    
-    /**
-     * @var unknown
+     * @var string
      */
     private $docroot = null;
+    
+    /**
+     * @var TestCase
+     */
+    private $testcase = null;
+    
+    /**
+     * @var Logger
+     */
+    private $logger = null;
     
     /**
      * @return self
@@ -41,6 +40,7 @@ class Application {
     private function __construct() {
         spl_autoload_register([$this, '_autoloader']);
         register_shutdown_function([$this, '_shutdown']);
+        $this->logger = new Logger();
     }
     
     /**
@@ -54,22 +54,10 @@ class Application {
      * @param unknown $path
      * @return string
      */
-    public function getDocPath( $path ) {
-        return $this->docroot.DIRECTORY_SEPARATOR.$path;
-    }
-    
-    /**
-     * @return \app\script\Runtime
-     */
-    public function getRuntime() {
-        return $this->runtime;
-    }
-    
-    /**
-     * @return \app\script\Parser 
-     */
-    public function getParser() {
-        return $this->parser;
+    public function getDocPath( $path=null ) {
+        return (null === $path) 
+        ? $this->docroot 
+        : $this->docroot.DIRECTORY_SEPARATOR.$path;
     }
     
     /**
@@ -97,50 +85,53 @@ class Application {
      * 
      */
     public function _shutdown() {
-        if ( null !== $this->runtime ) {
-            $this->runtime->shutdown();
+        if ( null !== $this->getTaseCase() ) {
+            $this->getTaseCase()->getRuntime()->shutdown();
         }
+    }
+    
+    /**
+     * log runtime message
+     * @param string $message
+     */
+    public function log( $message ) {
+        $this->logger->log($message);
+    }
+    
+    /**
+     * @return \app\script\TestCase
+     */
+    public function getTaseCase() {
+        return $this->testcase;
     }
     
     /**
      * @return void
      */
     public function start() {
-        $this->runtime = $runtime = new Runtime();
-        $this->parser = $parser = new Parser($runtime);
-        
         $params = $this->cliParseParams();
-        
         $this->docroot = $params['doc-root'];
-        
-        # set up env vars
-        $envpath = $this->getDocPath($params['env']);
-        if ( file_exists($envpath) ) {
-            $env = parse_ini_file($envpath, true);
-            $runtime->variableSet('env', $env);
-        }
-        
-        $this->runTests($params['path']);
+        $this->runTests($params['path'], $params);
     }
     
     /**
      * 
      */
-    private function runTests( $path ) {
+    private function runTests( $path, $params ) {
         $path = rtrim($path, '/\\');
         if ( is_file($path) ) {
-            echo "[==> {$path}]\n";
-            return $this->runCommandsByFile($path);
+            $this->testcase = new TestCase($path, $params);
+            $this->testcase->execute();
         } else if ( is_dir($path) ) {
             $files = scandir($path);
             foreach ( $files as $file ) {
                 $newPath = $path.DIRECTORY_SEPARATOR.$file;
                 if ( '.' === $file[0] 
-                || (is_file($newPath) && '.xy' !== pathinfo($file, PATHINFO_EXTENSION) ) 
+                || (is_file($newPath) && 'xy' !== pathinfo($file, PATHINFO_EXTENSION) ) 
                 ) {
                     continue;
                 }
-                $this->runTests($newPath);
+                $this->runTests($newPath, $params);
             }
         } else {
             throw new Exception("test path is not available : {$path}");
@@ -148,21 +139,23 @@ class Application {
     }
     
     /**
-     * @return \Commando\Command
+     * parse command options
+     * @return array
      */
     private function cliParseParams() {
+        $default = [];
+        $conffile = getcwd().'/xunyu.json';
+        if ( file_exists($conffile) ) {
+            $default = json_decode(file_get_contents($conffile), true);
+        }
+        
         $cmd = new Command();
         $cmd->option()->describedAs('path to test case(s)');
-        $cmd->option('e')->aka('env')->default('env.ini')->describedAs('path or name of env file, default to env.ini');
+        $cmd->option('e')->aka('env')->describedAs('path or name of env file, default to env.ini');
         $cmd->option('d')->aka('doc-root')->describedAs('path of document root');
         
         $params = array();
-        $conffile = getcwd().'/xunyu.json';
-        if ( file_exists($conffile) ) {
-            $params = json_decode(file_get_contents($conffile), true);
-        }
-        
-        $params['path'] = $cmd[0];
+        $params['path'] = (null===$cmd[0]) ? getcwd() : $cmd[0];
         $params['env'] = $cmd['env'];
         $params['doc-root'] = $cmd['doc-root'];
         if ( empty($params['doc-root']) ) {
@@ -170,33 +163,8 @@ class Application {
             ? $params['path'] 
             : dirname($params['path']);
         }
+        $params = array_filter($params);
+        $params = array_merge($default, $params);
         return $params;
-    }
-    
-    /**
-     * @param string $file
-     */
-    public function runCommandsByFile( $file ) {
-        $file = is_file($file) ? $file : $this->getDocPath($file);
-        if ( !file_exists($file) ) {
-            throw new RuntimeErrorException("unable to load script file : {$file}");
-        }
-        
-        $commands = file($file);
-        foreach ( $commands as $index => $commandText ) {
-            $commandText = trim($commandText);
-            if ( empty($commandText) ) {
-                continue;
-            }
-            try {
-                $command = $this->parser->parse($commandText);
-                $command->setDefination('file', $file);
-                $command->setDefination('line', $index+1);
-                $this->runtime->execCommand($command);
-            } catch ( Exception $e ) {
-                echo "\n\nERROR : {$e->getMessage()}\n";
-                exit();
-            }
-        }
     }
 }

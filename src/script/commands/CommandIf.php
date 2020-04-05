@@ -54,7 +54,7 @@ class CommandIf extends BaseCommand {
         } else if ( 1==count($this->blockChain) 
         && $command instanceof CommandEndif ) {
             # 当前块结束
-            \Application::app()->getRuntime()->blockFinished();
+            $this->getRuntime()->blockFinished();
             $this->exec();
         } else {
             # 普通命令
@@ -67,9 +67,6 @@ class CommandIf extends BaseCommand {
      * @see \app\script\commands\BaseCommand::run()
      */
     protected function run() {
-        $runtime = \Application::app()->getRuntime();
-        $parser = \Application::app()->getParser();
-        
         do {
             $branch = array_shift($this->branches);
             if ( null === $branch ) {
@@ -79,12 +76,8 @@ class CommandIf extends BaseCommand {
                 continue;
             }
             
-            foreach ( $branch['commands'] as $command ) {
-                $rawCommand = $command->getRawCommand();
-                $command = $parser->parse($rawCommand);
-                $command->setRawCommand($rawCommand);
-                $runtime->execCommand($command);
-            }
+            $file = $this->getDefination('file');
+            $this->getTestCase()->executeCommands($branch['commands'], $file);
             break;
         } while ( true );
     }

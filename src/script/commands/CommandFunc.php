@@ -43,7 +43,7 @@ class CommandFunc extends BaseCommand {
         } else if ( 1==count($this->blockChain)
         && $command instanceof CommandEndfunc ) {
             # 当前块结束
-            \Application::app()->getRuntime()->blockFinished();
+            $this->getRuntime()->blockFinished();
             $this->exec();
         } else {
             # 普通命令
@@ -73,12 +73,12 @@ class CommandFunc extends BaseCommand {
      * @see \app\script\commands\BaseCommand::run()
      */
     protected function run() {
-        $runtime = \Application::app()->getRuntime();
-        
         $func = new UserFunction();
         $func->name = $this->name;
         $func->paramNames = $this->params;
         $func->commands = $this->commands;
-        $runtime->funcRegister($func);
+        $func->file = $this->getDefination('file');
+        $func->line = $this->getDefination('line');
+        $this->getRuntime()->funcRegister($func);
     }
 }

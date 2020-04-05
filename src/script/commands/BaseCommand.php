@@ -1,5 +1,6 @@
 <?php
 namespace app\script\commands;
+use app\script\TestCase;
 /**
  * 
  */
@@ -23,11 +24,38 @@ abstract class BaseCommand implements ICommand {
     );
     
     /**
+     * @var TestCase
+     */
+    private $testcase = null;
+    
+    /**
+     * @return \app\script\TestCase
+     */
+    public function getTestCase() {
+        return $this->testcase;
+    }
+    
+    /**
+     * @param unknown $testcase
+     */
+    public function setTestCase( TestCase $testcase ) {
+        $this->testcase = $testcase;
+    }
+    
+    /**
      * {@inheritDoc}
      * @see \app\script\commands\ICommand::setDefination()
      */
     public function setDefination($name, $value) {
         $this->defination[$name] = $value;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \app\script\commands\ICommand::getDefination()
+     */
+    public function getDefination($name) {
+        return $this->defination[$name];
     }
     
     /**
@@ -105,25 +133,19 @@ abstract class BaseCommand implements ICommand {
      * @return \app\script\Runtime
      */
     protected function getRuntime() {
-        return \Application::app()->getRuntime();
+        return \Application::app()->getTaseCase()->getRuntime();
     }
     
     /**
      *
      */
     public function exec() {
-        if ( !$this->isBlockStart() ) {
-            echo "> {$this->getRawCommand()}\n";
-        }
         try {
             $this->run();
+            $this->testcase->tick($this);
+            \Application::app()->log("> {$this->getRawCommand()}");
         } catch ( \Exception $e ) {
-            echo "\n\n";
-            echo "Command Error : \n";
-            echo "{$e->getMessage()} \n";
-            echo "File : {$this->defination['file']}\n";
-            echo "Line : #{$this->defination['line']}\n";
-            exit();
+            $this->testcase->failed($this, $e);
         }
     }
     

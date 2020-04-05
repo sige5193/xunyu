@@ -8,7 +8,7 @@ class BuildinString {
      * @param unknown $content
      */
     public static function handleAppend( $varName, $content ) {
-        $runtime = \Application::app()->getRuntime();
+        $runtime = \Application::app()->getTaseCase()->getRuntime();
         $string = $runtime->variableGet($varName);
         $string = $string.$content;
         $runtime->variableSet($varName, $string);
@@ -22,7 +22,7 @@ class BuildinString {
         $path = \Application::app()->getDocPath($path);
         $content = file_get_contents($path);
         
-        $runtime = \Application::app()->getRuntime();
+        $runtime = \Application::app()->getTaseCase()->getRuntime();
         $runtime->variableSet($varName, $content);
     }
     
@@ -31,7 +31,7 @@ class BuildinString {
      * @param unknown $content
      */
     public static function handleMd5( $varName ) {
-        $runtime = \Application::app()->getRuntime();
+        $runtime = \Application::app()->getTaseCase()->getRuntime();
         
         $value = $runtime->variableGet($varName);
         $value = md5($value);
@@ -44,7 +44,7 @@ class BuildinString {
      * @param unknown $content
      */
     public static function handleUppercase( $varName ) {
-        $runtime = \Application::app()->getRuntime();
+        $runtime = \Application::app()->getTaseCase()->getRuntime();
         
         $value = $runtime->variableGet($varName);
         $value = strtoupper($value);
