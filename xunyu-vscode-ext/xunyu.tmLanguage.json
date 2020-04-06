@@ -1,0 +1,60 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "XunYu",
+  "patterns": [
+    {"include": "#keywords"},
+    {"include": "#comments"},
+    {"include": "#variables"},
+    {"include": "#assertions"},
+    {"include": "#commands"},
+    {"include": "#elements"}
+  ],
+  "repository": {
+    "elements" : {
+      "patterns": [{
+        "name":"entity.name.function.destructor.xunyu",
+        "match":"/\\S+\\s"
+      },{
+        "name":"entity.name.function.destructor.xunyu",
+        "match":"#\\S+\\s"
+      },{
+        "name":"entity.name.function.destructor.xunyu",
+        "match":"\\.\\S+\\s"
+      }]
+    },
+    "assertions" : {
+      "patterns": [{
+        "name":"invalid.illegal.xunyu",
+        "match":"^\\s*assert-[a-z\\-\\.]+\\s"
+      }]
+    },
+    "commands" : {
+      "patterns": [{
+        "name":"string.unquoted.xunyu",
+        "match":"^\\s*[a-z\\-\\.]+\\s"
+      }]
+    },
+    "keywords": {
+      "patterns": [{
+        "name": "keyword.control.xunyu",
+        "match": "^\\s*(active|call|close|include|log|func|return|set|use)\\s"
+      },{
+        "name": "keyword.control.xunyu",
+        "match": "^\\s*(if|elseif|else|endif|endfunc|loop|endloop)\\s"
+      }]
+    },
+    "comments" : {
+      "patterns": [{
+        "name":"comment.user.xunyu",
+        "match": "^\\s*#.*$"
+      }]
+    },
+    "variables" : {
+      "patterns": [{
+        "name":"variable.language.xunyu",
+        "match": "\\$[a-zA-Z0-9_\\.\\-]+"
+      }]
+    }
+  },
+  "scopeName": "source.xy"
+}

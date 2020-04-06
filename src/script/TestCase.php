@@ -1,6 +1,5 @@
 <?php
 namespace app\script;
-use Hoa\Console\Cursor;
 use app\script\commands\ICommand;
 use Commando\Command;
 
@@ -9,12 +8,7 @@ class TestCase {
      * @var string
      */
     private $path = null;
-    
-    /**
-     * @var integer
-     */
-    private $tickCount = 0;
-    
+
     /**
      * @var unknown
      */
@@ -45,25 +39,14 @@ class TestCase {
      * @return void
      */
     public function tick( ICommand $command ) {
-        $map = ['-','\\','|','/'];
-        
-        $this->tickCount ++;
-        Cursor::move('left', 100);
-        Cursor::colorize('bg(green)');
-        echo " {$map[$this->tickCount%4]} ";
-        Cursor::colorize('bd(black)');
-        echo " {$this->getTitle()}";
+        echo "  > {$command->getRawCommand()}\n";
     }
     
     /**
      * @param \Exception $e
      */
     public function failed( ICommand $command, \Exception $e ) {
-        Cursor::move('left', 100);
-        Cursor::colorize('bg(red)');
-        echo "   ";
-        Cursor::colorize('bd(black)');
-        echo " {$this->getTitle()} [ failed ]                                       \n";
+        echo "[ failed ]                                       \n";
         echo "Command Error : \n";
         echo "{$e->getMessage()} \n";
         echo "File : {$command->getDefination('file')}\n";
@@ -75,20 +58,22 @@ class TestCase {
     /**
      * 
      */
+    public function quit() {
+        echo "<<<< test case exited.";
+        exit();
+    }
+    
+    /**
+     * 
+     */
     public function success() {
-        Cursor::move('left', 100);
-        Cursor::colorize('bg(green)');
-        echo "   ";
-        Cursor::colorize('bd(black)');
-        echo " {$this->getTitle()} [ successed ]                              \n\n";
     }
     
     /**
      * @return void
      */
     public function execute() {
-        \Application::app()->log("--------------------------------------------------");
-        \Application::app()->log("Start {$this->getTitle()}");
+        echo "{$this->getTitle()}\n";
         $this->executeFile($this->path);
         $this->success();
     }

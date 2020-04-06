@@ -3,6 +3,11 @@
  */
 const vscode = require('vscode');
 
+
+class MockConfigurationProvider implements V {
+  
+}
+
 /**
  * @param {vscode.ExtensionContext} context
  */

@@ -198,7 +198,7 @@ class OperatorBrowser extends BaseOperator {
         
         switch ( $plarform ) {
         case 'windows' :
-            $command = "\"\"{$driverPath}\" \"--port={$port}\"\"";
+            $command = "\"\"{$driverPath}\" \"--port={$port}\" \"--silent\"\"";
             $this->cmdPattern = "#chromedriver.*?--port={$port}#";
             break;
         default:

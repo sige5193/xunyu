@@ -2,6 +2,18 @@
 
 yet another automation testing tool
 
+
+
+### Installing
+
+Install xunyu for Windows, Mac and Linux from release page, then get start
+
+- download the last release [here](https://github.com/sige-chen/xunyu/releases) .
+- unzip the package,  and enter the folder
+- click `install.bat` for windows or `install.sh` for linux and mac 
+
+
+
 **code example**
 
 ```

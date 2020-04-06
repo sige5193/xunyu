@@ -7,11 +7,18 @@
     "vscode": "^1.43.0"
   },
   "categories": [
-    "Other","Programming Languages","Themes","Snippets"
+    "Other",
+    "Programming Languages",
+    "Themes",
+    "Snippets",
+    "Debuggers"
   ],
   "activationEvents": [
     "onCommand:extension.xunyuCommandRecorderStart",
-    "onCommand:extension.xunyuRunTest"
+    "onCommand:extension.xunyuRunTest",
+    
+    "onDebug", 
+    "onCommand:extension.mock-debug.getProgramName"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -82,6 +89,62 @@
       {
         "language": "xunyu",
         "path": "./snippets.json"
+      }
+    ],
+
+    "breakpoints": [{ "language": "markdown" }],
+    "debuggers": [
+      {
+        "type": "xunyu",
+        "label": "xunyu",
+
+        "program": "./out/mockDebug.js",
+        "runtime": "node",
+
+        "configurationAttributes": {
+          "launch": {
+            "required": ["program"],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Absolute path to a text file.",
+                "default": "${workspaceFolder}/${command:AskForProgramName}"
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Automatically stop after launch.",
+                "default": true
+              }
+            }
+          }
+        },
+
+        "initialConfigurations": [
+          {
+            "type": "xunyu",
+            "request": "launch",
+            "name": "Ask for file name",
+            "program": "${workspaceFolder}/${command:AskForProgramName}",
+            "stopOnEntry": true
+          }
+        ],
+
+        "configurationSnippets": [
+          {
+            "label": "Mock Debug: Launch",
+            "description": "A new configuration for launching a mock debug program",
+            "body": {
+              "type": "mock",
+              "request": "launch",
+              "name": "${2:Launch Program}",
+              "program": "^\"\\${workspaceFolder}/${1:Program}\""
+            }
+          }
+        ],
+
+        "variables": {
+          "AskForProgramName": "extension.mock-debug.getProgramName"
+        }
       }
     ]
   },

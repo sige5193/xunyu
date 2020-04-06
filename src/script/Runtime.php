@@ -62,6 +62,12 @@ class Runtime {
      * @return void
      */
     public function execCommand( ICommand $command ) {
+        $exitSignalFile = \Application::app()->getDocPath('xunyu-exit.signal');
+        if ( file_exists($exitSignalFile) ) {
+            unlink($exitSignalFile);
+            \Application::app()->getTaseCase()->quit();
+        }
+        
         if ( null !== $this->block ) {
             $this->block->pushCommand($command);
         } else if ( $command->isBlockStart() ) {

@@ -1,0 +1,149 @@
+{
+  "name": "xunyu-vscode-ext",
+  "displayName": "xunyu-vscode-ext",
+  "description": "a vscode extension for xunyu",
+  "version": "0.0.4",
+  "publisher": "sige-chen",
+  "license": "LGPL-3.0-or-later",
+  "engines": {
+    "vscode": "^1.43.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Debuggers",
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.helloWorld",
+    "onDebug",
+    "onCommand:extension.mock-debug.getProgramName"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "xunyu",
+        "aliases": [
+          "XunYu",
+          "xunyu"
+        ],
+        "extensions": [
+          ".xy"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "xunyu",
+        "scopeName": "source.xy",
+        "path": "./xunyu.tmLanguage.json"
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "xunyu"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "xunyu",
+        "label": "Xunyu",
+        "program": "./out/debugAdapter.js",
+        "runtime": "node",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Absolute path to a text file.",
+                "default": "${workspaceFolder}/${command:AskForProgramName}"
+              },
+              "envname": {
+                "type": "string",
+                "description": "path to env file.",
+                "default": "env.ini"
+              },
+              "docroot": {
+                "type": "string",
+                "description": "path to document root path.",
+                "default": "${workspaceFolder}"
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Automatically stop after launch.",
+                "default": true
+              },
+              "trace": {
+                "type": "boolean",
+                "description": "Enable logging of the Debug Adapter Protocol.",
+                "default": true
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "xunyu",
+            "request": "launch",
+            "name": "Ask for file name",
+            "program": "${workspaceFolder}/${command:AskForProgramName}",
+            "stopOnEntry": true,
+            "envname": "env.ini",
+            "docroot": "${workspaceFolder}"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Xunyu Debug: Launch",
+            "description": "A new configuration for 'debugging' a user selected xunyu file.",
+            "body": {
+              "type": "xunyu",
+              "request": "launch",
+              "name": "xunyu launch",
+              "program": "^\"\\${file}\"",
+              "stopOnEntry": true,
+              "envname": "env.ini",
+              "docroot": "^\"\\${workspaceFolder}\""
+            }
+          }
+        ],
+        "variables": {
+          "AskForProgramName": "extension.mock-debug.getProgramName"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint src --ext ts",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.43.0",
+    "eslint": "^6.8.0",
+    "@typescript-eslint/parser": "^2.18.0",
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "glob": "^7.1.6",
+    "mocha": "^7.0.1",
+    "typescript": "^3.7.5",
+    "vscode-test": "^1.3.0"
+  },
+  "dependencies": {
+    "await-notify": "1.0.1",
+    "vscode-debugadapter": "1.40.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sige-chen/xunyu.git"
+  },
+  "icon": "images/icon.png"
+}

@@ -151,7 +151,7 @@ class Application {
         
         $cmd = new Command();
         $cmd->option()->describedAs('path to test case(s)');
-        $cmd->option('e')->aka('env')->describedAs('path or name of env file, default to env.ini');
+        $cmd->option('e')->aka('env')->default('env.ini')->describedAs('path or name of env file, default to env.ini');
         $cmd->option('d')->aka('doc-root')->describedAs('path of document root');
         
         $params = array();

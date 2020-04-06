@@ -140,9 +140,9 @@ abstract class BaseCommand implements ICommand {
      *
      */
     public function exec() {
+        $this->testcase->tick($this);
         try {
             $this->run();
-            $this->testcase->tick($this);
             \Application::app()->log("> {$this->getRawCommand()}");
         } catch ( \Exception $e ) {
             $this->testcase->failed($this, $e);
