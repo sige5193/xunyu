@@ -6,6 +6,6 @@ Xunyu is an automation testing tool, you can use this tool to test browser ui, h
 
 ## Features
 
--  Run Testcases
+- Run Testcases
 - Syntax Highlight
-
+- Code Autocomplete

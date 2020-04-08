@@ -4,6 +4,14 @@
 import * as vscode from 'vscode';
 import { XunyuConfigurationProvider } from './XunyuConfigurationProvider';
 import { XunyuDebugAdapterFactory } from './XunyuDebugAdapterFactory';
+import {LanguageClient,LanguageClientOptions,ServerOptions,TransportKind} from 'vscode-languageclient';
+import { workspace } from 'vscode';
+const path = require('path');
+
+/**
+ * 
+ */
+let client: LanguageClient;
 
 /**
  * @param context 
@@ -21,11 +29,27 @@ export function activate(context: vscode.ExtensionContext) {
   let rdadf = vscode.debug.registerDebugAdapterDescriptorFactory('xunyu', zdaf);
   context.subscriptions.push(rdadf);
   context.subscriptions.push(zdaf);
+
+  // start language server
+  let serverModule = context.asAbsolutePath(path.join('out','XunyuLanguageServer.js'));
+  let serverOptions: ServerOptions = {
+    run: { module: serverModule, transport: TransportKind.ipc },
+    debug: {module: serverModule,transport: TransportKind.ipc,options:{execArgv:['--nolazy','--inspect=6009']}}
+  };
+  let clientOptions : LanguageClientOptions = {
+    documentSelector: [{ scheme: 'file', language: 'xunyu' }],
+    synchronize: {fileEvents: workspace.createFileSystemWatcher('**/.clientrc')}
+  };
+  client = new LanguageClient('XunyuLanguageServer','Xunyu Language Server',serverOptions,clientOptions);
+  client.start();
 }
 
 /**
  * 
  */
 export function deactivate() {
+  if (client) {
+    client.stop();
+  }
   console.log('extension "xunyu-vscode-ext" is now deactivate!');
 }
