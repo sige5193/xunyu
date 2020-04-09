@@ -1,199 +1,286 @@
 /**
- * 标签列表，用于生成关闭tab的命令
- */
-let tabs = {
-   /*'id' : {
-      'url' : 'tab的url连接',
-      'title' : 'tab标题',
-   }*/
-};
-
-let commandReceiver = new WebSocket('ws://127.0.0.1:60000/');
-commandReceiver.onclose = function() { console.log("命令接收器已断开"); }
-commandReceiver.onmessage = function(e) {console.log(e.data);}
-
-/**
  * 
  */
-commandReceiver.onopen = function() { 
-   chrome.browserAction.setBadgeText({text:'rec..'});
-   XYSendCommandsToReceiver('use browser chrome');
-}
+class XunyuBackgroundHandler {
+  /**
+   * 
+   */
+  constructor() {
+    this.server = null;
+    this.currentTab = null;
+    this.tabs = {};
+    this.cachedCommand = null;
+    this.editCommands = [];
+    this.status = 'initted';
 
-/**
- * 
- */
-commandReceiver.onerror = function( error ) {
-   chrome.browserAction.setBadgeText({text:'error'});
-   alert("命令接收器连接失败");
-};
+    let $this = this;
+    chrome.runtime.onMessage.addListener(function(request,sender,sendResponse) {
+      $this.onRuntimeMessage(request,sender,sendResponse);
+    });
+    chrome.tabs.onCreated.addListener(function( tab ) {
+      $this.onTabCreated(tab);
+    });
+    chrome.tabs.onUpdated.addListener(function( tabId, changeInfo, tab ) {
+      $this.onTabUpdated(tabId,changeInfo,tab );
+    });
+    chrome.tabs.onActivated.addListener(function( activeInfo ) {
+      $this.onTabActivated(activeInfo);
+    });
+    chrome.tabs.onRemoved.addListener(function( tabId, removeInfo ) {
+      $this.onTabRemoved(tabId, removeInfo);
+    });
+  }
 
-/**
- * 将命令发送到接收者
- * @param {string|string[]} commands
- */
-function XYSendCommandsToReceiver( commands ) {
-   if ( 'string' == typeof(commands) ) {
+  /**
+   * @param {*} tab 
+   */
+  onTabCreated( tab ) {
+    this.currentTab = {id:tab.id,hasSend:false};
+    this.tabs[`TAB:${tab.id}`] = {url:tab.url};
+  }
+
+  /**
+   * 
+   */
+  onTabActivated( activeInfo ) {
+    this.currentTab = {id:activeInfo.tabId,hasSend:false};
+
+    let $this = this;
+    chrome.tabs.get(activeInfo.tabId, function( tab ) {
+      if ( "" == tab.url ) {
+        $this.currentTab = {id:activeInfo.tabId,hasSend:false};
+        return;
+      }
+
+      $this.currentTab = {id:activeInfo.tabId,hasSend:true};
+      $this.cacheCommand(`switch-tab ${tab.url}`);
+    });
+  }
+
+  /**
+   * 
+   */
+  onTabUpdated( tabId, changeInfo, tab ) {
+    this.tabs[`TAB:${tabId}`] = {url:tab.url};
+
+    if ( 'complete' == tab.status 
+    && tabId == this.currentTab.id 
+    && !this.currentTab.hasSend ) {
+      this.currentTab.hasSend = true;
+      this.cacheCommand(`switch-tab ${tab.url}`);
+    }
+  }
+
+  /**
+   * @param {*} tabId 
+   * @param {*} removeInfo 
+   */
+  onTabRemoved( tabId, removeInfo ) {
+    let url = this.tabs[`TAB:${tabId}`].url;
+    this.cacheCommand(`close-tab-by-url ${url}`);
+    delete this.tabs[`TAB:${tabId}`];
+  }
+
+  /**
+   * 
+   */
+  handlerNewCommand( request, sendResponse ) {
+    this.cacheCommand(request.command);
+    sendResponse({success:true});
+  }
+
+  /**
+   * @param {string|array} commands 
+   */
+  sendCommands( commands ) {
+    if ( 'string' == typeof(commands) ) {
       commands = [commands];
-   }
-   console.log(`send : ${JSON.stringify(commands)}`);
-   if ( commandReceiver.readyState != commandReceiver.OPEN ) {
+    }
+    
+    if ( 0 == commands.length 
+    || null == this.server 
+    || this.server.readyState != this.server.OPEN 
+    || 'recording' != this.status
+    ) {
+      console.log('ignore commands : '+commands.join('; '));
       return;
-   }
-   commandReceiver.send(JSON.stringify({action:'NEW-COMMANDS',commands:commands}));
-}
+    }
 
-/**
- * 刷新缓存的命令到命令接收器
- */
-function XYFlushCommandToReceiver() {
-   let edittingCommands = localStorage.getItem("EdittingCommands");
-   if ( null == edittingCommands || "" == edittingCommands ) {
-      edittingCommands = "[]";
-   }
-   if ( null != edittingCommands ) {
-      edittingCommands = JSON.parse(edittingCommands);
-   } 
-   
-   if ( 0 == edittingCommands.length ) {
-      let catchedCommand = localStorage.getItem("CachedCommand");
-      if ( null != catchedCommand ) {
-         edittingCommands.push(catchedCommand);
-      }
-   }
-   
-   // 把命令通过websocket发送给接收端
-   if (0 < edittingCommands.length) {
-      XYSendCommandsToReceiver(edittingCommands);
-   }
-}
+    this.server.send(JSON.stringify({action:'NEW-COMMANDS',commands:commands}));
+    console.log('send commands : '+commands.join('; '));
+  }
 
-/**
- * 
- */
-function XYMessageHandlerNewCommand( request, sendResponse ) {
-   if ( commandReceiver.readyState != commandReceiver.OPEN ) {
-      return;
-   }
+  /**
+   * 
+   */
+  onRuntimeMessage(request, sender, sendResponse) {
+    if ( !('undefined' != request.source && 'xunyu' == request.source) ) {
+      return ;
+    }
+    
+    switch ( request.action ) {
+    case 'NEW-COMMAND' : this.handlerNewCommand(request, sendResponse); break;
+    }
+  }
 
-   XYFlushCommandToReceiver();
+  /**
+   * 
+   */
+  serverConnect(callback) {
+    let $this = this;
+    let port = this.getConfig('RecordServerPort', 60000);
+    this.server = new WebSocket(`ws://127.0.0.1:${port}`);
+    this.server.onerror = this.onServerError;
+    this.server.onclose = this.onServerClose;
+    this.server.onopen = function() {
+      $this.onServerOpen(callback);
+    };
+  }
 
-   localStorage.setItem("CachedCommand", request.command);
-   localStorage.setItem("EdittingCommands", JSON.stringify([]));
-
-   chrome.browserAction.setBadgeText({text:''});
-   setTimeout(function() {
-      chrome.browserAction.setBadgeText({text: request.command.substr(0,4)});
-      chrome.browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 255]});
-   }, 200);
-
-   sendResponse({success:true});
-}
-
-/**
- * 结束录制
- */
-function XYDoneRecording() {
-   XYFlushCommandToReceiver();
-   commandReceiver.send(JSON.stringify({action:'NEW-COMMANDS',commands:['close']}));
-   commandReceiver.send(JSON.stringify({action:'STOP-RECORDING'}));
-   setTimeout(function() {
-      commandReceiver.close();
-   }, 200);
-   chrome.browserAction.setBadgeText({text:'stop'});
-}
-
-/**
- * 获取一个Tab的唯一属性
- */
-function XYTabGetUniqueAttribute( tabId ) {
-   if ( 'undefined' == typeof(tabs[`tab-${tabId}`]) ) {
-      return null;
-   }
-   let tab = tabs[`tab-${tabId}`];
-   let titleCount = 0;
-   for ( let tabKey in tabs ) {
-      if ( tab.title == tabs[tabKey].title ) {
-         titleCount ++;
-      }
-   }
-   if ( 1==titleCount && 0 < tab.title.trim().length) {
-      return {attr:'title', title:tab.title};
-   } else {
-      return {attr:'url', url:tab.url};
-   }
-}
-
-/**
- * 监听来自content的消息
- */
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if ( !('undefined' != request.source && 'xunyu' == request.source) ) {
-    return ;
+  /**
+   * 
+   */
+  onServerOpen(callback) {
+    console.log('==> server opened');
+    chrome.browserAction.setBadgeText({text:'rec..'});
+    this.status = 'recording';
+    this.cacheCommand('use browser chrome');
+    setTimeout(function() {
+      callback();
+    }, 200);
   }
   
-  switch ( request.action ) {
-  case 'NEW-COMMAND' : 
-    XYMessageHandlerNewCommand(request, sendResponse);
-    break;
+  /**
+   * @param {*} message 
+   */
+  onServerMessage ( e ) {
+    console.log(e.data);
   }
-});
+
+  /**
+   * 
+   */
+  onServerClose() {
+    chrome.browserAction.setBadgeText({text:'disco'});
+    alert('record server disconnected.');
+  }
+
+  /**
+   * 
+   */
+  onServerError( error ) {
+    chrome.browserAction.setBadgeText({text:'error'});
+    alert("failed to connect to server.");
+  }
+
+  /**
+   * @param {*} name 
+   * @param {*} value 
+   */
+  getConfig(name, value = null) {
+    return value;
+  }
+
+  /**
+   * 结束录制
+   */
+  close() {
+    let commands = this.editCommands;
+    if ( 0 == commands.length  && null != this.cachedCommand) {
+      commands.push(this.cachedCommand);
+    }
+    this.sendCommands(commands);
+
+    this.server.send(JSON.stringify({action:'STOP-RECORDING'}));
+    setTimeout(function() {
+      this.server.close();
+    }, 200);
+    chrome.browserAction.setBadgeText({text:'stop'});
+    this.status = 'closed';
+  }
+
+  /**
+   * 
+   */
+  start(callback) {
+    chrome.browserAction.setBadgeText({text: 'con..'});
+    chrome.browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 255]});
+
+    background.serverConnect(callback);
+  }
+
+  /**
+   * @param {*} command 
+   */
+  cacheCommand( command ) {
+    // flush old commands
+    let commands = this.editCommands;
+    if ( 0 == commands.length  && null != this.cachedCommand) {
+      commands.push(this.cachedCommand);
+    }
+    this.sendCommands(commands);
+
+    // cache new commands
+    this.cachedCommand = command;
+    this.editCommands = [];
+    chrome.browserAction.setBadgeText({text:''});
+
+    setTimeout(function() {
+      chrome.browserAction.setBadgeText({text: command.substr(0,4)});
+      chrome.browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 255]});
+    }, 200);
+  }
+
+  /**
+   * - initted
+   * - recording
+   * - closed
+   */
+  getStatus() {
+    return this.status;
+  }
+
+  /**
+   * @returns {string}
+   */
+  getCachedCommand() {
+    return this.cachedCommand;
+  }
+
+  /**
+   * @returns {string[]}
+   */
+  getEditCommands() {
+    return this.editCommands;
+  }
+
+  /**
+   * @param {*} commands 
+   */
+  setEditCommands( commands ) {
+    if ( this.status == 'recording' ) {
+      this.editCommands = commands;
+    }
+  }
+
+  /**
+   * @param {*} command 
+   */
+  pushEditCommand(command) {
+    if ( this.status == 'recording' ) {
+      this.editCommands.push(command);
+    }
+  }
+}
 
 /**
- * 监听新tab
+ * 
  */
-chrome.tabs.onCreated.addListener(function( tab ) {
-   tabs[`tab-${tab.id}`] = {
-      url : tab.url,
-      title : tab.title
-   };
-});
-/**
- * 监听tab更新
- */
-chrome.tabs.onUpdated.addListener(function( tabId, changeInfo, tab ) {
-   tabs[`tab-${tabId}`] = {
-      url : tab.url,
-      title : tab.title
-   };
-});
-/**
- * 监听tab关闭
- */
-chrome.tabs.onRemoved.addListener(function( tabId, removeInfo ) {
-   let tabInfo = XYTabGetUniqueAttribute(tabId);
-   if ( null == tabInfo ) {
-      return;
-   }
+let background = new XunyuBackgroundHandler();
 
-   let closeCmd = null;
-   if ( 'title' == tabInfo.attr ) {
-      closeCmd = `close-tab-by-title "${tabInfo.title}"`;
-   } else {
-      closeCmd = `close-tab-by-url "${tabInfo.url}"`;
-   }
-   XYSendCommandsToReceiver(closeCmd);
-   delete tabs[`tab-${tabId}`];
-});
 /**
- * 监听tab激活事件
+ * 
  */
-chrome.tabs.onActivated.addListener(function( activeInfo ) {
-   let tabInfo = XYTabGetUniqueAttribute(activeInfo.tabId);
-   if ( null == tabInfo ) {
-      return;
-   }
-
-   let switchCmd = null;
-   if ( 'title' == tabInfo.attr ) {
-      switchCmd = `switch-tab-by-title "${tabInfo.title}"`;
-   } else {
-      switchCmd = `switch-tab-by-url "${tabInfo.url}"`;
-   }
-   XYSendCommandsToReceiver(switchCmd);
-});
-
-localStorage.removeItem("CachedCommand");
-localStorage.removeItem("EdittingCommands");
-chrome.browserAction.setBadgeText({text: 'con..'});
-chrome.browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 255]});
+function getBackground() {
+  return background;
+}

@@ -21,10 +21,7 @@ new Vue({
      * @param {*} param 
      */
     formatParam( param ) {
-      param = param.replace(/"/g, '\\"');
-      if ( false != param.indexOf(' ') ) {
-        param = `"${param}"`;
-      }
+      param = param.replace(/ /g, '\\ ');
       return param;
     },
     /**
@@ -41,11 +38,7 @@ new Vue({
       if ( null != this.param3 ) {
         command += ` ${this.formatParam(this.param3)}`;
       }
-
-      let edittingCmds = localStorage.getItem("EdittingCommands");
-      edittingCmds = (null == edittingCmds) ? [] : JSON.parse(edittingCmds);
-      edittingCmds.push(command);
-      localStorage.setItem("EdittingCommands", JSON.stringify(edittingCmds));
+      chrome.extension.getBackgroundPage().getBackground().pushEditCommand(command);
       window.close();
     },
     /**

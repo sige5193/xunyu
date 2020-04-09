@@ -41,7 +41,6 @@ export class XunyuLanguageServerCompletionItems {
     items.push({label:'take-screenshot',kind: CompletionItemKind.Method, data:{operator:'browser'}});
     items.push({label:'switch-to-frame',kind: CompletionItemKind.Method, data:{operator:'browser'}});
     items.push({label:'switch-to-parent',kind: CompletionItemKind.Method, data:{operator:'browser'}});
-    items.push({label:'close-current-tab',kind: CompletionItemKind.Method, data:{operator:'browser'}});
     items.push({label:'blur',kind: CompletionItemKind.Method, data:{operator:'browser'}});
     items.push({label:'wait-title',kind: CompletionItemKind.Method, data:{operator:'browser'}});
     items.push({label:'wait-url',kind: CompletionItemKind.Method, data:{operator:'browser'}});
@@ -60,7 +59,8 @@ export class XunyuLanguageServerCompletionItems {
     items.push({label:'assert-alert-present',kind: CompletionItemKind.Method, data:{operator:'browser'}});
     items.push({label:'close-tab',kind: CompletionItemKind.Method, data:{operator:'browser'}});
     items.push({label:'close-tab-by-url',kind: CompletionItemKind.Method, data:{operator:'browser'}});
-
+    items.push({label:'close-current-tab',kind: CompletionItemKind.Method, data:{operator:'browser'}});
+  
     items.push({label:'method',kind: CompletionItemKind.Method, data:{operator:'poster'}});
     items.push({label:'address',kind: CompletionItemKind.Method, data:{operator:'poster'}});
     items.push({label:'body-add',kind: CompletionItemKind.Method, data:{operator:'poster'}});

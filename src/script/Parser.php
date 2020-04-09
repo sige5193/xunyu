@@ -84,7 +84,9 @@ class Parser {
     
     /**
      * split command to parts
-     * @param unknown $commandText
+     * @example normal : click #id
+     * @example escaped : click >"hi"\ he\ said
+     * @param string $commandText
      * @return string[]
      */
     private function split( $commandText ) {
@@ -98,7 +100,13 @@ class Parser {
         $commandChars = str_split($commandText);
         for ($i=0; $i<count($commandChars); $i++) {
             $char = $commandChars[$i];
-            if ( ' ' === $char && empty($part) ) {
+            if ('\\' === $char ) {
+                $i++;
+                if ( !isset($commandChars[$i]) ) {
+                    throw new \Exception("no escaped char found");
+                }
+                $part[] = $commandChars[$i];
+            } else if ( ' ' === $char && empty($part) ) {
                 # ignore the spaces before the part starts
                 continue;
             } else if ( ' ' === $char && !empty($part) ) {

@@ -6,12 +6,17 @@ import { XunyuConfigurationProvider } from './XunyuConfigurationProvider';
 import { XunyuDebugAdapterFactory } from './XunyuDebugAdapterFactory';
 import {LanguageClient,LanguageClientOptions,ServerOptions,TransportKind} from 'vscode-languageclient';
 import { workspace } from 'vscode';
+import { XunyuCommandRecorder } from './XunyuCommandRecorder';
 const path = require('path');
 
 /**
  * 
  */
 let client: LanguageClient;
+/**
+ * 
+ */
+let recorder : XunyuCommandRecorder;
 
 /**
  * @param context 
@@ -29,6 +34,13 @@ export function activate(context: vscode.ExtensionContext) {
   let rdadf = vscode.debug.registerDebugAdapterDescriptorFactory('xunyu', zdaf);
   context.subscriptions.push(rdadf);
   context.subscriptions.push(zdaf);
+
+  // register a record command
+  recorder = new XunyuCommandRecorder();
+  let disposable = vscode.commands.registerCommand('extension.xunyuRecorderStart', function () {
+    recorder.start();
+  });
+  context.subscriptions.push(disposable);
 
   // start language server
   let serverModule = context.asAbsolutePath(path.join('out','XunyuLanguageServer.js'));
@@ -48,8 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
  * 
  */
 export function deactivate() {
-  if (client) {
-    client.stop();
-  }
+  if (client) { client.stop(); }
+  if (recorder) {recorder.stop();}
   console.log('extension "xunyu-vscode-ext" is now deactivate!');
 }

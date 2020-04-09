@@ -2,7 +2,7 @@
   "name": "xunyu-vscode-ext",
   "displayName": "xunyu-vscode-ext",
   "description": "a vscode extension for xunyu",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "publisher": "sige-chen",
   "license": "LGPL-3.0-or-later",
   "engines": {
@@ -16,8 +16,7 @@
   "activationEvents": [
     "onDebug",
     "onLanguage:xunyu",
-    "onCommand:extension.helloWorld",
-    "onCommand:extension.mock-debug.getProgramName"
+    "onCommand:extension.xunyuRecorderStart"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -115,7 +114,48 @@
           "AskForProgramName": "extension.mock-debug.getProgramName"
         }
       }
-    ]
+    ],
+    "commands": [
+      {
+        "command": "extension.xunyuRecorderStart",
+        "title": "Record Script"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorFocus",
+          "command": "extension.xunyuRecorderStart",
+          "group": "xunyu"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "Xunyu",
+      "properties": {
+        "chromePath": {
+          "type": "string",
+          "default": "\"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\"",
+          "description": "Chrome browser path"
+        },
+        "chromeExtPath": {
+          "type": "string",
+          "default": "D:\\Flashin\\荀彧\\xunyu\\chrome-ext",
+          "description": "Chrome extension path"
+        },
+        "chromeExtId": {
+          "type": "string",
+          "default": "apajegcajemgenjoijknmifjbegjebno",
+          "description": "Chrome extension ID"
+        },
+        "recordServerPort": {
+          "type": "integer",
+          "default": 60000,
+          "description": ""
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
@@ -143,7 +183,8 @@
     "vscode-debugadapter": "1.40.0",
     "vscode-languageclient": "^6.1.3",
     "vscode-languageserver": "^6.1.1",
-    "vscode-languageserver-textdocument": "^1.0.1"
+    "vscode-languageserver-textdocument": "^1.0.1",
+    "nodejs-websocket": "^1.7.2"
   },
   "repository": {
     "type": "git",

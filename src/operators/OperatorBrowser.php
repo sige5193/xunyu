@@ -10,6 +10,7 @@ use Facebook\WebDriver\Remote\RemoteWebElement;
 use app\script\ArgumentParser;
 use Facebook\WebDriver\Remote\LocalFileDetector;
 use app\script\Assertion;
+use app\script\RuntimeErrorException;
 /**
  *
  */
@@ -700,6 +701,24 @@ class OperatorBrowser extends BaseOperator {
     }
     
     /**
+     * @param unknown $url
+     */
+    public function cmdSwitchTab( $url ) {
+        $tabs = $this->driver->getWindowHandles();
+        $hasFound = false;
+        foreach ( $tabs as $tab ) {
+            $this->driver->switchTo()->window($tab);
+            if ( $url === $this->driver->getCurrentURL() ) {
+                $hasFound = true;
+                break;
+            }
+        }
+        if ( !$hasFound ) {
+            throw new RuntimeErrorException("unable to switch tab to '{$url}'");
+        }
+    }
+    
+    /**
      * @param string $selector
      * @example #id
      * @example .class
@@ -715,6 +734,7 @@ class OperatorBrowser extends BaseOperator {
         case '.' : return WebDriverBy::className(substr($selector, 1));
         case '/' : return WebDriverBy::xpath($selector);
         case '>' : return WebDriverBy::linkText(substr($selector, 1));
+        case '@' : return WebDriverBy::name(substr($selector, 1));
         default  : return WebDriverBy::tagName($selector);
         }
     }

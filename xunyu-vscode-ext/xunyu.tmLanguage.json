@@ -19,6 +19,12 @@
         "match":"#\\S+\\s"
       },{
         "name":"entity.name.function.destructor.xunyu",
+        "match":"@\\S+\\s"
+      },{
+        "name":"entity.name.function.destructor.xunyu",
+        "match":">(\\S|(?<=\\\\)\\s)+\\s"
+      },{
+        "name":"entity.name.function.destructor.xunyu",
         "match":"\\.\\S+\\s"
       }]
     },

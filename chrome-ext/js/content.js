@@ -40,7 +40,7 @@ function XYgetElemSelector( elem ) {
       }
     }
     if ( 1 == linkCount ) {
-      return `>${linkText}`;
+      return XYFormatParam(`>${linkText}`);
     }
   }
 
@@ -134,13 +134,11 @@ function XYCommandSend( cmd ) {
 }
 
  /**
-   * @param {*} param 
-   */
+  * 
+  * @param {*} param 
+  */
 function XYFormatParam( param ) {
-  param = param.replace(/"/g, '\\"');
-  if ( false != param.indexOf(' ') ) {
-    param = `"${param}"`;
-  }
+  param = param.replace(/ /g, '\\ ');
   return param;
 }
 

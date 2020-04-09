@@ -1,14 +1,13 @@
 new Vue({
   el: '#app',
   data: {
-    isRecording : false,
     commands : [],
     customCommandIndex : null,
     customCommand : '',
   },
   watch : {
     commands : function () {
-      localStorage.setItem("EdittingCommands", JSON.stringify(this.commands));
+      chrome.extension.getBackgroundPage().getBackground().setEditCommands(this.commands);
     },
   },
   methods : {
@@ -54,14 +53,13 @@ new Vue({
      */
     doneRecording: function() {
       // 通知后台将所有命令刷新到服务器
-      let bg = chrome.extension.getBackgroundPage();
-      bg.XYDoneRecording();
+      let bg = chrome.extension.getBackgroundPage().getBackground();
+      bg.close();
 
       // 关闭所有窗口， 这将导致浏览器退出
       setTimeout(function() {
         chrome.tabs.query({}, function(tabs) {
           let responesHandler = function( response ) { console.log(response); };
-          debugger;
           let messageData = {source:'xunyu', action:'DONE-RECORDING'};
           for ( let i=0; i<tabs.length; i++ ) {
             chrome.tabs.sendMessage(tabs[i].id, messageData, responesHandler);
@@ -76,18 +74,8 @@ new Vue({
    * 
    */
   mounted : function() {
-    this.isRecording = localStorage.getItem("IsRecording");
-    if ( null == this.isRecording ) {
-      this.isRecording = false;
-    }
-
-    // 获取编辑中的命令列表
-    let edittingCmds = localStorage.getItem("EdittingCommands");
-    if ( null != edittingCmds ) {
-      this.commands = JSON.parse(edittingCmds);
-    }
-
-    let catchedCommand = localStorage.getItem("CachedCommand");
+    this.commands = chrome.extension.getBackgroundPage().getBackground().getEditCommands();
+    let catchedCommand = chrome.extension.getBackgroundPage().getBackground().getCachedCommand();
     if ( null != catchedCommand && 0 == this.commands.length ) {
       this.commands.push(catchedCommand);
     }

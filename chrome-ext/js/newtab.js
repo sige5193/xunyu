@@ -1,11 +1,15 @@
 document.getElementById("btn-start").onclick = function() {
   let url = document.getElementById("txt-address").value.trim();
   if ( 0 == url.length ) {
-    alert("请输入目标地址");
+    alert("please input target address");
     return false;
   }
 
-  localStorage.setItem("IsRecording", "YES");
-  localStorage.setItem("CachedCommand", `open ${url}`);
-  window.location.href = url;
+  let background = chrome.extension.getBackgroundPage().getBackground();
+  background.start(function() {
+    background.cacheCommand(`open ${url}`);
+    setTimeout(function() {
+      window.location.href = url;
+    }, 300);
+  });
 };
