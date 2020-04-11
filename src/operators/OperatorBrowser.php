@@ -11,6 +11,9 @@ use app\script\ArgumentParser;
 use Facebook\WebDriver\Remote\LocalFileDetector;
 use app\script\Assertion;
 use app\script\RuntimeErrorException;
+use Facebook\WebDriver\WebDriver;
+use Facebook\WebDriver\Exception\NoAlertOpenException;
+use Facebook\WebDriver\Exception\NoSuchAlertException;
 /**
  *
  */
@@ -146,11 +149,7 @@ class OperatorBrowser extends BaseOperator {
         $plarform = \Application::app()->getPlatformName();
         switch ( $plarform ) {
         case 'windows' :
-            $chromePath = trim(shell_exec("where chrome.exe"));
-            if ( empty($chromePath) ) {
-                throw new \Exception("unable to find chrome.exe, please make sure you have chrome.exe in your PATH.");
-            }
-            
+            $chromePath = \Application::app()->config['Browsers']['ChromePath'];
             $chromePath = str_replace('\\', '\\\\', $chromePath);
             $chromeVersion = trim(shell_exec("wmic datafile where name=\"{$chromePath}\" get Version /value"));
             $chromeVersion = explode('.', str_replace('Version=', '', $chromeVersion));
@@ -192,7 +191,7 @@ class OperatorBrowser extends BaseOperator {
         
         $driverPath = \Application::app()->getPath("webdriver/chromedriver-{$driverVersion}{$driverExt}");
         if ( !file_exists($driverPath) ) {
-            throw new \Exception("not supported browser type `{$this->browserName}-v{$this->version}`");
+            throw new \Exception("not supported browser type `{$this->browserName}-v{$chromeVersion}`");
         }
         
         $port = $this->findAnAvailablePort();
@@ -557,7 +556,18 @@ class OperatorBrowser extends BaseOperator {
      */
     public function cmdWaitAlertPresent( $timeout=null ) {
         $wait = new WebDriverWait($this->driver, $timeout);
-        $wait->until(WebDriverExpectedCondition::alertIsPresent());
+        $wait->until(function( WebDriver $driver ) {
+            try {
+                $alert = $driver->switchTo()->alert();
+                $alert->getText();
+                
+                return $alert;
+            } catch (NoAlertOpenException $e) {
+                return null;
+            } catch (NoSuchAlertException $e ) {
+                return null;
+            }
+        });
     }
     
     /**

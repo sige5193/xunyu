@@ -24,6 +24,11 @@ class Application {
     private $logger = null;
     
     /**
+     * @var array
+     */
+    public $config = [];
+    
+    /**
      * @return self
      */
     public static function app() {
@@ -108,7 +113,8 @@ class Application {
     /**
      * @return void
      */
-    public function start() {
+    public function start( $config = []) {
+        $this->config = $config;
         $params = $this->cliParseParams();
         $this->docroot = $params['doc-root'];
         $this->runTests($params['path'], $params);
