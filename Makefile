@@ -3,7 +3,9 @@ build-windows :
 	cp src/* build/windows/ -r
 	rm -f build/windows/composer.json
 	rm -f build/windows/composer.lock
-	powershell "Compress-Archive build/windows build/windows/xunyu-windows-x64.zip"
+
+pack-windows :
+	iscc xunyu.iss
 
 clean :
 	rm -fr build/windows
