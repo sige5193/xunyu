@@ -18,7 +18,7 @@ Windows 10
 
 | Type    | Name    | Version |
 | ------- | ------- | ------- |
-| Chrome  | chrome  | 80      |
+| Chrome  | chrome  | 80,81   |
 | FIrefox | firefox |         |
 | IE      | ie      |         |
 
