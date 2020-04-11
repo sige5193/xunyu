@@ -1,0 +1,77 @@
+# example : browser operations
+# @author sige
+# 
+# to start this test, 
+# $ cd resource
+# $ php -S 127.0.0.1:8888 -t .
+
+use browser chrome
+open http://127.0.0.1:8888/example.html
+
+click #ts-click
+dblclick #ts-dbclick
+hover #ts-hover
+select #ts-select value2
+input #ts-input 123
+upload #ts-file resource/example.html
+
+click #ts-blur
+blur #ts-blur
+
+click #ts-alert
+wait-alert-present
+alert-accept
+
+click #ts-confirm
+wait-alert-present
+alert-dismiss
+
+click #ts-prompt
+wait-alert-present
+alert-input 000
+alert-accept
+
+click #tab1
+switch-tab http://127.0.0.1:8888/tab1.html
+close-tab-by-url http://127.0.0.1:8888/tab1.html
+
+click #tab2
+switch-tab http://127.0.0.1:8888/tab2.html
+close-current-tab
+
+switch-to-frame #iframe
+click #ts-iframe-btn
+switch-to-parent
+
+take-screenshot screenshot/screenshot.png
+
+click #tsw-title
+wait-title new-title
+input #tow-title title\ changed
+
+click #tsw-url
+wait-url http://127.0.0.1:8888/example.html#tag
+input #tow-title url\ changed
+
+click #tsw-elem-exists
+wait-elem-exists #new-elem
+input #tow-elem-exists new\ elem\ exists
+
+click #tsw-elem-visiable
+wait-elem-visiable #elem-invisible
+input #tow-elem-visiable elem\ visiable
+
+click #tsw-elem-invisible
+wait-elem-invisible #elem-visiable
+input #tow-elem-invisible elem\ invisible
+
+click #tsw-elem-text
+wait-elem-text #tsw-elem-text changed
+input #tow-elem-text elem\ text\ changed
+
+click #tsw-alert
+wait-alert-present
+alert-accept
+input #tow-alert alert\ present
+
+close

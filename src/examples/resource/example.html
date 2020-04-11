@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>example</title>
+</head>
+<body>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>test</th>
+        <th>operator</th>
+        <td>output</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>click</td><td><button id="ts-click">click</button></td><td><input id="to-click" type="text"></td></tr>
+      <tr><td>double click</td><td><button id="ts-dbclick">click</button></td><td><input id="to-dbclick" type="text"></td></tr>
+      <tr><td>hover</td><td id="ts-hover"></td><td><input id="to-hover" type="text"></td></tr>
+      <tr><td>select</td><td><select id="ts-select"><option value="1">value1<option value="2">value2</select></td><td><input id="to-select" type="text"></td></tr>
+      <tr><td>input</td><td><input id="ts-input" type="text"></td><td><input id="to-input" type="text"></td></tr>
+      <tr><td>file upload</td><td><input id="ts-file" type="file"></td><td><input id="to-file" type="text"></td></tr>
+      <tr><td>blur</td><td><input id="ts-blur" type="text"></td><td><input id="to-blur" type="text"></td></tr>
+      <tr><td>alert accept</td><td><button id="ts-alert">open alert</button></td><td><input id="to-alert" type="text"></td></tr>
+      <tr><td>alert dismiss</td><td><button id="ts-confirm">open confirm</button></td><td><input id="to-confirm" type="text"></td></tr>
+      <tr><td>alert prompt</td><td><button id="ts-prompt">open prompt</button></td><td><input id="to-prompt" type="text"></td></tr>
+      <tr><td>tab manage</td><td><a href="tab1.html" target="_blank" id="tab1">tab1</a> <a href="tab2.html" target="_blank" id="tab2">tab2</a></td><td></td></tr>
+      <tr><td>iframe switch</td><td><iframe id="iframe" src="iframe.html" style="border:0;height:20px;"></iframe></td><td><input id="to-frame" type="text"></td></tr>
+      <tr><td>wait title</td><td><button id="tsw-title">change title</button></td><td><input id="tow-title" type="text"></td></tr>
+      <tr><td>wait url</td><td><button id="tsw-url">change url</button></td><td><input id="tow-url" type="text"></td></tr>
+      <tr><td>wait elem exists</td><td id="tsw-elem-exists-con"><button id="tsw-elem-exists">new exists</button></td><td><input id="tow-elem-exists" type="text"></td></tr>
+      <tr><td>wait elem not exists</td><td><button id="tsw-elem-not-exists">remove this</button></td><td><input id="tow-elem-not-exists" type="text"></td></tr>
+      <tr><td>wait elem visiable</td><td><button id="tsw-elem-visiable">show elem</button><div style="display:none" id="elem-invisible">h</div></td><td><input id="tow-elem-visiable" type="text"></td></tr>
+      <tr><td>wait elem invisible</td><td><button id="tsw-elem-invisible">hide elem</button><div style="display:inline" id="elem-visiable">s</div></td><td><input id="tow-elem-invisible" type="text"></td></tr>
+      <tr><td>wait elem text</td><td><button id="tsw-elem-text">change text</button></td><td><input id="tow-elem-text" type="text"></td></tr>
+      <tr><td>wait alert present</td><td><button id="tsw-alert">alert</button></td><td><input id="tow-alert" type="text"></td></tr>
+    </tbody>
+  </table>
+</body>
+<script type="text/javascript">
+document.getElementById('ts-click').addEventListener('click', function() {
+  document.getElementById('to-click').value = 'elem clicked';
+});
+document.getElementById('ts-dbclick').addEventListener('dblclick', function() {
+  document.getElementById('to-dbclick').value = 'elem double clicked';
+});
+document.getElementById('ts-hover').addEventListener('mouseenter', function() {
+  document.getElementById('to-hover').value = 'elem hovered';
+});
+document.getElementById('ts-select').addEventListener('change', function() {
+  document.getElementById('to-select').value = 'elem value changed';
+});
+document.getElementById('ts-input').addEventListener('change', function() {
+  document.getElementById('to-input').value = 'elem value changed';
+});
+document.getElementById('ts-file').addEventListener('change', function() {
+  document.getElementById('to-file').value = 'elem value changed';
+});
+document.getElementById('ts-alert').addEventListener('click', function() {
+  alert('example');
+  document.getElementById('to-alert').value = 'alert accept';
+});
+document.getElementById('ts-confirm').addEventListener('click', function() {
+  if ( !confirm('example') ) {
+    document.getElementById('to-confirm').value = 'alert confirm';
+  }
+});
+document.getElementById('ts-prompt').addEventListener('click', function() {
+  var value = prompt('example');
+  document.getElementById('to-prompt').value = 'alert prompt : ' + value;
+});
+document.getElementById('ts-blur').addEventListener('blur', function() {
+  document.getElementById('to-blur').value = 'elem blur triggered';
+});
+document.getElementById('tsw-title').addEventListener('click', function() {
+  setTimeout(function(){document.title = 'new-title';}, 2000);
+});
+document.getElementById('tsw-url').addEventListener('click', function() {
+  setTimeout(function(){window.location.href = window.location.href+'#tag';}, 2000);
+});
+document.getElementById('tsw-elem-exists').addEventListener('click', function() {
+  setTimeout(function(){
+    var btn = document.createElement("button"); 
+    btn.id = 'new-elem';
+    document.getElementById('tsw-elem-exists-con').appendChild(btn);
+  }, 2000);
+});
+document.getElementById('tsw-elem-not-exists').addEventListener('click', function() {
+  setTimeout(function(){
+    var box=document.getElementById("tsw-elem-not-exists");
+    box.parentNode.removeChild(box);
+  }, 2000);
+});
+document.getElementById('tsw-elem-visiable').addEventListener('click', function() {
+  setTimeout(function(){
+    document.getElementById('elem-invisible').style.display = 'block';
+  }, 2000);
+});
+document.getElementById('tsw-elem-invisible').addEventListener('click', function() {
+  setTimeout(function(){
+    document.getElementById('elem-visiable').style.display = 'none';
+  }, 2000);
+});
+document.getElementById('tsw-elem-text').addEventListener('click', function() {
+  setTimeout(function(){
+    document.getElementById('tsw-elem-text').innerText = 'changed';
+  }, 2000);
+});
+document.getElementById('tsw-alert').addEventListener('click', function() {
+  setTimeout(function(){
+    alert('alert');
+  }, 5000);
+});
+</script>
+</html>
