@@ -34,8 +34,8 @@ export class XunyuCommandRecorder {
     }).listen(recordServerPort);
 
     console.log('start record client');
-    const chromePath = vscode.workspace.getConfiguration().get('chromePath');
-    const chromeExtPath = vscode.workspace.getConfiguration().get('chromeExtPath');
+    const chromePath = `"${vscode.workspace.getConfiguration().get('chromePath')}"`;
+    const chromeExtPath = `"${vscode.workspace.getConfiguration().get('chromeExtPath')}"`;
     const chromeExtId = vscode.workspace.getConfiguration().get('chromeExtId');
     let clientCmd = `${chromePath} --load-extension=${chromeExtPath} chrome-extension://${chromeExtId}/newtab.html`;
     const childProcess = require("child_process");

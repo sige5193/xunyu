@@ -2,7 +2,7 @@
   "name": "xunyu-vscode-ext",
   "displayName": "xunyu-vscode-ext",
   "description": "a vscode extension for xunyu",
-  "version": "0.2.1",
+  "version": "0.2.10",
   "publisher": "sige-chen",
   "license": "LGPL-3.0-or-later",
   "engines": {
@@ -13,11 +13,22 @@
     "Debuggers",
     "Other"
   ],
+  "keywords": [
+    "test-automation",
+    "ui-recorder",
+    "testing",
+    "test-framework",
+    "webdriver"
+  ],
   "activationEvents": [
     "onDebug",
     "onLanguage:xunyu",
     "onCommand:extension.xunyuRecorderStart"
   ],
+  "galleryBanner": {
+    "color": "#000000",
+    "theme": "dark"
+  },
   "main": "./out/extension.js",
   "contributes": {
     "languages": [
@@ -136,12 +147,12 @@
       "properties": {
         "chromePath": {
           "type": "string",
-          "default": "\"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\"",
+          "default": "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
           "description": "Chrome browser path"
         },
         "chromeExtPath": {
           "type": "string",
-          "default": "D:\\Flashin\\荀彧\\xunyu\\chrome-ext",
+          "default": "C:\\ProgramFiles\\xunyu\\chrome-ext",
           "description": "Chrome extension path"
         },
         "chromeExtId": {
