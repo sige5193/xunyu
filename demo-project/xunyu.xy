@@ -1,8 +1,0 @@
-use browser chrome
-open https://www.douban.com
-click >贝聿铭建筑作品集
-click /html/body/div[3]/div[1]/div[3]/div[1]/div[2]/div[1]/a/img
-click >返回相册
-click /html/body/div[3]/div[1]/div[3]/div[1]/div[2]/div[2]/a/img
-click >返回相册
-close
