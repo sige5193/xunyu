@@ -2,7 +2,7 @@
   "name": "xunyu-vscode-ext",
   "displayName": "xunyu-vscode-ext",
   "description": "a vscode extension for xunyu",
-  "version": "0.2.10",
+  "version": "0.3.0",
   "publisher": "sige-chen",
   "license": "LGPL-3.0-or-later",
   "engines": {
@@ -23,7 +23,8 @@
   "activationEvents": [
     "onDebug",
     "onLanguage:xunyu",
-    "onCommand:extension.xunyuRecorderStart"
+    "onCommand:extension.xunyuRecorderStart",
+    "onCommand:extension.xunyuPasteFromCurl"
   ],
   "galleryBanner": {
     "color": "#000000",
@@ -130,6 +131,10 @@
       {
         "command": "extension.xunyuRecorderStart",
         "title": "Record Script"
+      },
+      {
+        "command": "extension.xunyuPasteFromCurl",
+        "title": "Paste From Curl (bash)"
       }
     ],
     "menus": {
@@ -137,6 +142,11 @@
         {
           "when": "editorFocus",
           "command": "extension.xunyuRecorderStart",
+          "group": "xunyu"
+        },
+        {
+          "when": "editorFocus",
+          "command": "extension.xunyuPasteFromCurl",
           "group": "xunyu"
         }
       ]

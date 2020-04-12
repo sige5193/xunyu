@@ -12,6 +12,7 @@ Xunyu is an automation testing tool, you can use this tool to test browser ui, h
 - Syntax Highlight
 - Code Autocomplete
 - Browser UI Record / Replay
+- Convert Curl Command To Test Command
 
 
 

@@ -7,6 +7,7 @@ import { XunyuDebugAdapterFactory } from './XunyuDebugAdapterFactory';
 import {LanguageClient,LanguageClientOptions,ServerOptions,TransportKind} from 'vscode-languageclient';
 import { workspace } from 'vscode';
 import { XunyuCommandRecorder } from './XunyuCommandRecorder';
+import { XunyuCommandPasteFromCurl } from './XunyuCommandPasteFromCurl';
 const path = require('path');
 
 /**
@@ -34,6 +35,9 @@ export function activate(context: vscode.ExtensionContext) {
   let rdadf = vscode.debug.registerDebugAdapterDescriptorFactory('xunyu', zdaf);
   context.subscriptions.push(rdadf);
   context.subscriptions.push(zdaf);
+
+  // register command for 'paste from curl'
+  vscode.commands.registerCommand('extension.xunyuPasteFromCurl', XunyuCommandPasteFromCurl.handle);
 
   // register a record command
   recorder = new XunyuCommandRecorder();

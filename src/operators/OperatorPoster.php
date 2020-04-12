@@ -32,6 +32,11 @@ class OperatorPoster extends BaseOperator {
     private $preRequestHandlerName = null;
     
     /**
+     * @var array
+     */
+    private $headers = [];
+    
+    /**
      * @param unknown $method
      */
     public function cmdMethod( $method ) {
@@ -51,6 +56,14 @@ class OperatorPoster extends BaseOperator {
      */
     public function cmdBodyAdd( $key, $value ) {
         $this->body[$key] = $value;
+    }
+    
+    /**
+     * @param unknown $key
+     * @param unknown $value
+     */
+    public function cmdHeaderAdd( $key, $value ) {
+        $this->headers[$key] = $value;
     }
     
     /**
